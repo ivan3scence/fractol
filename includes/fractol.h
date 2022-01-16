@@ -12,5 +12,20 @@
 # include "../libft/libft.h"
 # include "../mlx_linux/mlx.h"
 
-# define MAX_ITER 255
+# define MAX_ITER 1000
+# define WIDTH 1920
+# define HEIGHT 1080
+typedef struct s_mlx
+{
+	void	*mlx;
+	void	*win;
+
+	void	*img;
+	char	*addr;
+	int		bpp;
+	int		line_length;
+	int		endian;
+	double	p1[2];
+	double	p2[2];
+}	t_mlx;
 # endif
