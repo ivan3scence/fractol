@@ -127,8 +127,8 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 		mandelbrot(mlx);
 		return ;
 	}
-	cursor_x = mlx->p1[0] + pixel_x * cursor_x;
-	cursor_y = mlx->p1[1] - pixel_y * cursor_y;
+	cursor_x = temp0 + pixel_x * cursor_x;
+	cursor_y = temp1 - pixel_y * cursor_y;
 	printf("delta_x %g\ndelta_y: %g\n", cursor_x, cursor_y);
 
 	mlx->p1[0] = (3 * mlx->p1[0] + mlx->p2[0]) / mult + cursor_x;
