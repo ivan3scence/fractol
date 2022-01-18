@@ -10,11 +10,12 @@
 # include <fcntl.h>
 # include <errno.h>
 # include "../libft/libft.h"
-# include "../mlx_linux/mlx.h"
+//# include "../mlx_linux/mlx.h"
+# include <mlx.h>
 
 # define MAX_ITER 1000
-# define WIDTH 1920
-# define HEIGHT 1080
+# define WIDTH 2000
+# define HEIGHT 2000
 typedef struct s_mlx
 {
 	void	*mlx;
