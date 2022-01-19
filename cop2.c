@@ -43,69 +43,76 @@ int	create_trgb(int t, int r, int g, int b)
 	return (t << 24 | r << 16 | g << 8 | b);
 }
 
+/*
+ * 00 7f ff 00
+ * 00 00 fa 9a
+ */
+
+static int	color(int iter, int sumiter)
+{
+	int	r[2];
+	int	g[2];
+	int	b[2];
+
+	r[0] = 135;
+	r[1] = 0;
+	g[0] = 206;
+	g[1] = 250;
+	b[0] = 235;
+	b[1] = 154;
+	//return (iter * iter);
+	return (create_trgb(0, get_r(r[0] + iter / sumiter), get_g(g[0] + iter / sumiter),
+				get_b(b[0] + iter / sumiter)));
+}
+
 static int	draw_pixel(t_mlx *mlx, double x, double y, int w, int h)
 {
 	int	i;
-	double	p = x;
-	double	q = y;
-	double	x_temp;
-	double	sqr;
+	double	x2=0;	
+	double	y2=0;	
+	double	x0 = x;
+	double	y0 = y;
 
 	i = -1;
-	//printf("%g\n", sqrt(3.84 / (mlx->p2[0] - mlx->p1[0])) * 70); 
-	//while (++i < (int)sqrt(3.84 / (mlx->p2[0] - mlx->p1[0])) * 70)
-	while (++i < 100)
+	while (++i < 500 && x2 + y2 <= 4)
 	{
-		sqr = x * x + y * y;
-		if (sqr * sqr > 4)
-			break ;
-		x_temp = x;
-		x = x * x - y * y + p;
-		y = 2 * x_temp * y + q;
+		y = (x + x) * y + y0;
+		x = x2 - y2 + x0;
+		x2 = x * x;
+		y2 = y * y;
 	}
-	//if (i == (int)sqrt(3.84 / (mlx->p2[0] - mlx->p1[0])) * 70)
-	if (i == 100)
-		my_mlx_pixel_put(mlx, w, h, 0x00000000);
+	if (i == 500)
+		my_mlx_pixel_put(mlx, w, h, 0);
 	else
-		my_mlx_pixel_put(mlx, w, h, i * i);
+		my_mlx_pixel_put(mlx, w, h, color(i, 183335119));
 	//printf("%d\n", i);
-	return (1);
+	return (i);
 }
 
 static void mandelbrot(t_mlx *mlx)
 {
 	double	x=mlx->p1[0];
 	double	y=mlx->p1[1];
-	double	yy=y;
 	int		w=-1;
 	int		h;
+	long long int		sum=0;
 
 	while (++w < WIDTH)
 	{
 		h = -1;
-		y = yy;
+		y = mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			draw_pixel(mlx, x, y, w, h);
+			sum += draw_pixel(mlx, x, y, w, h);
 			//printf("%g, %g\n", x, y);
 			y += (mlx->p2[1] - mlx->p1[1]) / HEIGHT;
 		}
 		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
 	}
+	ft_putnbr_fd(sum, 1);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
 }
 
-int	key_hook(int keycode, t_mlx *mlx)
-{
-	if (keycode == 65307)
-	{
-		//mlx_destroy_image(
-		mlx_destroy_window(mlx->mlx, mlx->win);
-		exit(0);
-	}
-	printf("Hello from key_hook!\n%d\n", keycode); //4-zoom in.....5-zoom out
-	return (0);
-}
 
 static void	zoom(t_mlx *mlx, int x, int y,float mult)
 {
@@ -127,8 +134,8 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 		mandelbrot(mlx);
 		return ;
 	}
-	cursor_x = temp0 + pixel_x * cursor_x;
-	cursor_y = temp1 - pixel_y * cursor_y;
+	cursor_x = mlx->p1[0] + pixel_x * cursor_x;
+	cursor_y = mlx->p1[1] - pixel_y * cursor_y;
 	printf("delta_x %g\ndelta_y: %g\n", cursor_x, cursor_y);
 
 	mlx->p1[0] = (3 * mlx->p1[0] + mlx->p2[0]) / mult + cursor_x;
@@ -139,6 +146,23 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 	printf("p1[0] %g; p1[1] %g\n", mlx->p1[0], mlx->p1[1]);
 	printf("p2[0] %g; p2[1] %g\n", mlx->p2[0], mlx->p2[1]);
 	mandelbrot(mlx);
+}
+
+int	key_hook(int keycode, t_mlx *mlx)
+{
+	if (keycode == 65307
+			|| keycode == 53)     //MocOs
+	{
+		//mlx_destroy_image(
+		mlx_destroy_window(mlx->mlx, mlx->win);
+		exit(0);
+	}
+	if (keycode == 69)
+		zoom(mlx, WIDTH / 2, HEIGHT / 2, 4);
+	else if (keycode == 78)
+		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
+	printf("Hello from key_hook!\n%d\n", keycode); //4-zoom in.....5-zoom out
+	return (0);
 }
 
 static int	mouse(int keycode, int x, int y, t_mlx *mlx)
@@ -160,10 +184,10 @@ int	main(void)
 	mlx.img = mlx_new_image(mlx.mlx, WIDTH, HEIGHT);
 	mlx.addr = mlx_get_data_addr(mlx.img, &mlx.bpp, &mlx.line_length,
 								&mlx.endian);
-	mlx.p1[0] = -1.92;
-	mlx.p1[1] = 1.08;
-	mlx.p2[0] = 1.92;
-	mlx.p2[1] = -1.08;
+	mlx.p1[0] = -2;
+	mlx.p1[1] = 2;
+	mlx.p2[0] = 2;
+	mlx.p2[1] = -2;
 
 	mandelbrot(&mlx);
 	mlx_mouse_hook(mlx.win, mouse, &mlx);
