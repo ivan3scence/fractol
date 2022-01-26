@@ -26,7 +26,7 @@ typedef struct s_mlx
 	int		bpp;
 	int		line_length;
 	int		endian;
-	double	p1[2];
-	double	p2[2];
+	long double	p1[2];
+	long double	p2[2];
 }	t_mlx;
 # endif

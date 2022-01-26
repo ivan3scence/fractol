@@ -1,15 +1,5 @@
 #include "../includes/fractol.h"
 
-//typedef struct	s_data {
-//	void	*img;
-//	char	*addr;
-//	int		bits_per_pixel;
-//	int		line_length;
-//	int		endian;
-//	double	p1[2];
-//	double	p2[2];
-//}				t_data;
-
 int	get_t(int trgb)
 {
 	return ((trgb >> 24) & 0xFF);
@@ -48,7 +38,7 @@ int	create_trgb(int t, int r, int g, int b)
  * 00 00 fa 9a
  */
 
-static int	palette(int itersum, int total)
+static int	palette(float hue)
 {
 	int	r[2];
 	int	g[2];
@@ -61,184 +51,281 @@ static int	palette(int itersum, int total)
 	b[0] = 50;
 	b[1] = 200;
 	//return (iter * iter);
+	if (hue == -1)
+		return (0);
 	return (create_trgb(0,
-						r[0] + itersum / total * (r[1] - r[0]),
-						g[0] + itersum / total * (g[1] - g[0]),
-						b[0] + itersum / total * (b[1] - b[0])
+						r[0] + hue * (r[1] - r[0]),
+						g[0] + hue * (g[1] - g[0]),
+						b[0] + hue * (b[1] - b[0])
 						));
 	//return (create_trgb(0, get_r(iter / MAX_ITER * 255), get_g(iter / MAX_ITER * 255),
 	//			get_b(iter / MAX_ITER * 255)));
 }
 
-static int	draw_pixel(t_mlx *mlx, double x, double y, int w, int h)
+static int	*get_numiters(int **arr, t_mlx *mlx)
 {
-	double	i;
-	double	x2=0;
-	double	y2=0;
-	double	x0=x;
-	double	y0=y;
-	double	xtemp;
+	int	x;
+	int	y;
+	int	*ret;
+
+	ret = (int *)malloc(sizeof(int) * (MAX_ITER + log2(4 /
+					(mlx->p2[0] - mlx->p1[0])) + 1));
+	if (!ret)
+		exit(1);
+	x = -1;
+	while (++x <= MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		ret[x] = 0;
+	x = -1;
+	while (++x < WIDTH)
+	{
+		y = -1;
+		y++;
+		(void)arr;
+		while (++y < HEIGHT)
+		{
+			if (arr[x][y] > -1)
+				ret[arr[x][y]] += 1;
+		}
+	}
+	return (ret);
+}
+
+static int	get_total(int *numiters, t_mlx *mlx)
+{
+	int	x;
+	int	total;
+
+	x = -1;
+	while (++x <= MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		total += numiters[x];
+	return (total);
+}
+
+/*static int	mndlbrt(t_mlx *mlx, long double x, long double y)
+{
+	int		i;
+	long double	x2=x * x;
+	long double	y2=y * y;
+	long double	x0=x;
+	long double	y0=y;
 
 	i = -1;
-
-	while (x2 + y2 <= 4 && i < MAX_ITER)
+	x2 = x * x;
+	y2 = y * y;
+	x0 = x;
+	y0 = y;
+	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
+	while (x2 + y2 <= 4
+			&& ++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))))
 	{
 		y = (x + x) * y + y0;
 		x = x2 - y2 + x0;
 		x2 = x * x;
 		y2 = y * y;
 	}
-	/*while (++i < MAX_ITER && x * x + y * y <= (1<<16))
-	{
-		xtemp = x * x - y * y + x0;
-		y = 2 * x * y + y0;
-		x = xtemp;
-	}*/
-	/*double	log_zn;
-	double	nu;
-	if (i < MAX_ITER)
-	{
-		log_zn = log(x * x + y * y) / 2;
-		nu = log(log_zn / log(2)) / log(2);
-		i = i + 1 - nu;
-	}*/
-	/*int color1=palette(floor(i));
-	int color2=palette(floor(i) + 1);
-	int	color = color1 + (color2 - color1) * modf(i, &x);
-	//yp = y0 + ((y1-y0)/(x1-x0)) * (xp - x0);
-	my_mlx_pixel_put(mlx, w, h, color);*//*
-	my_mlx_pixel_put(mlx, w, h, i*i);
+	return (i);
+}*/
 
+static int	julia(t_mlx *mlx, long double x, long double y)
+{
+	int		i;
+	long double	x2=x * x;
+	long double	y2=y * y;
+	long double	x0=x;
+	long double	y0=y;
 
-	if (i == 500)
-		my_mlx_pixel_put(mlx, w, h, 0);
-	else
-		my_mlx_pixel_put(mlx, w, h, color(i, 183335119));
-	//printf("%d\n", i);*/
+	i = -1;
+	x2 = x * x;
+	y2 = y * y;
+	x0 = x;
+	y0 = y;
+	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
+	while (x2 + y2 <= 16
+			&& ++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))))
+	{
+		y = (x + x) * y + y0;
+		x = x2 - y2 + x0;
+		x2 = x * x;
+		y2 = y * y;
+	}
 	return (i);
 }
 
-static int	*get_numiters(int **arr)
+static int		**iter_count(t_mlx *mlx)
 {
-	int	x;
-	int	y;
-	int	*ret;
-
-	ret = (int *)malloc(sizeof(int) * MAX_ITER);
-	if (!ret)
-		exit(1);
-	x = -1;
-	while (++x < WIDTH)
-	{
-		y = -1;
-		while (++y < HEIGHT)
-			ret[arr[x][y]]++;
-	}
-	return (ret);
-}
-
-static int	get_total(int *numiters)
-{
-	int	x;
-	int	total;
-
-	x = -1;
-	while (++x < MAX_ITER)
-		total += numiters[x];
-	return (total);
-}
-
-static void mandelbrot(t_mlx *mlx)
-{
-	double	x=mlx->p1[0];
-	double	y=mlx->p1[1];
-	int		w=-1;
+	int		**array_iters;
 	int		h;
-	int		**array_iters=(int **)malloc(sizeof(int *) * WIDTH);
-	long long int		sum=0;
+	int		w;
+	long double		x;
+	long double		y;
 
+	array_iters = (int **)malloc(sizeof(int *) * WIDTH);
+	if (!array_iters)
+		exit(1);
+	w = -1;
+	x = mlx->p1[0];
 	while (++w < WIDTH)
 	{
 		array_iters[w] = (int *)malloc(sizeof(int) * HEIGHT);
+		if (!array_iters)
+			exit(1);
 		h = -1;
 		y = mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			array_iters[w][h] = draw_pixel(mlx, x, y, w, h);
-			//printf("%g, %g\n", x, y);
-			y += (mlx->p2[1] - mlx->p1[1]) / HEIGHT;
+			//array_iters[w][h] = mndlbrt(mlx, x, y);
+			array_iters[w][h] = julia(mlx, x, y);
+			if (array_iters[w][h] == MAX_ITER + log2(4
+						/ (mlx->p2[0] - mlx->p1[0])))
+				array_iters[w][h] = -1;
+			//printf("%d %g %g\n", array_iters[w][h],x,y);
+			y -= (mlx->p1[1] - mlx->p2[1]) / HEIGHT;
 		}
 		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
-		ft_putstr_fd("hey\n", 1);
 	}
-	ft_putstr_fd("hey\n", 1);
-	int	*numiters;
-	numiters = get_numiters(array_iters);
-	ft_putstr_fd("hey\n", 1);
-	int	total;
-	total = get_total(numiters);
-	ft_putstr_fd("hey\n", 1);
-	
+	return (array_iters);
+}
+
+static void	clean_array(double **hue, int **array_iters, int *numiters)
+{
+	int	w;
+
 	w = -1;
-	x=mlx->p1[0];
-	y=mlx->p1[1];
-	ft_putstr_fd("hey\n", 1);
+	while (++w < WIDTH)
+	{
+		free(hue[w]);
+		free(array_iters[w]);
+	}
+	free(hue);
+	free(array_iters);
+	free(numiters);
+}
+
+static double	**get_hue(void)
+{
+	int		xx;
+	int		yy;
+	double	**hue;
+
+	xx = -1;
+	yy = -1;
+	hue = (double **)malloc(sizeof(double *) * WIDTH);
+	if (!hue)
+		exit(1);
+	while (++xx < WIDTH)
+	{
+		yy = -1;
+		hue[xx] = (double *)malloc(sizeof(double) * HEIGHT);
+		if (!hue[xx])
+			exit(1);
+		while (++yy < HEIGHT)
+			hue[xx][yy] = 0;
+	}
+	return (hue);
+}
+
+static void	set_hue(double **hue, int **array_iters, int *numiters, int total)
+{
+	int	iter;
+	int	i;
+	int	w;
+	int	h;
+
+	w = -1;
 	while (++w < WIDTH)
 	{
 		h = -1;
-		y = mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			my_mlx_pixel_put(mlx, w, h, palette(numiters[array_iters[w][h]], total));
-
-			//printf("%g, %g\n", x, y);
-			y += (mlx->p2[1] - mlx->p1[1]) / HEIGHT;
+			iter = array_iters[w][h];
+			if (iter == -1)
+				hue[w][h] = -1;
+			else
+			{
+				i = -1;
+				while (++i <= iter)
+				{
+					hue[w][h] += (float) numiters[i] / total;
+				}
+			}
 		}
-		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
 	}
-	free(array_iters);//dfdfdfdf
-	free(numiters);
+}
 
-	//ft_putnbr_fd(sum, 1);
+static void	draw_pic(t_mlx *mlx, double **hue)
+{
+	int	w;
+	int	h;
+
+	w = -1;
+	while (++w < WIDTH)
+	{
+		h = -1;
+		while (++h < HEIGHT)
+			my_mlx_pixel_put(mlx, w, h, palette(hue[w][h]));
+	}
+}
+
+static void start(t_mlx *mlx)
+{
+	int		**array_iters;
+	int		*numiters;
+	int		total;
+	double	**hue;
+
+	array_iters = iter_count(mlx);
+	numiters = get_numiters(array_iters, mlx);
+	total = get_total(numiters, mlx);
+	hue = get_hue();
+	set_hue(hue, array_iters, numiters, total);
+	draw_pic(mlx, hue);
+	clean_array(hue, array_iters, numiters);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
 }
 
+static void	zoomout(t_mlx *mlx, int x, int y,float mult)
+{
+	long double	cursor_x;
+	long double	cursor_y;
+
+	cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
+	cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
+	printf("delta_x %Lg\ndelta_y: %Lg\n", cursor_x, cursor_y);
+	mlx->p1[0] = cursor_x - (cursor_x - mlx->p1[0]) / mult;
+	mlx->p1[1] = cursor_y + (mlx->p1[1] - cursor_y) / mult;
+	mlx->p2[0] = cursor_x + (mlx->p2[0] - cursor_x) / mult;
+	mlx->p2[1] = cursor_y - (cursor_y - mlx->p2[1]) / mult;
+	printf("p1[0] %Lg; p1[1] %Lg\n", mlx->p1[0], mlx->p1[1]);
+	printf("p2[0] %Lg; p2[1] %Lg\n", mlx->p2[0], mlx->p2[1]);
+	printf("%g\n", (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))));
+	start(mlx);
+	return ;
+}
 
 static void	zoom(t_mlx *mlx, int x, int y,float mult)
 {
-	double temp0=mlx->p1[0];
-	double temp1=mlx->p1[1];
-	double	cursor_x=x;
-	double	cursor_y=y;
-	double	pixel_x = (mlx->p2[0] - mlx->p1[0]) / WIDTH;
-	double	pixel_y = (mlx->p1[1] - mlx->p2[1]) / HEIGHT;
+	long double	cursor_x;
+	long double	cursor_y;
 
 	if (mult < 1)
 	{
-		mlx->p1[0] = (3 * mlx->p1[0] - mlx->p2[0]) * mult;
-		mlx->p1[1] = (3 * mlx->p1[1] - mlx->p2[1]) * mult;
-		mlx->p2[0] = (3 * mlx->p2[0] - temp0) * mult;
-		mlx->p2[1] = (3 * mlx->p2[1] - temp1) * mult;
-		printf("into if\np1[0] %g; p1[1] %g\n", mlx->p1[0], mlx->p1[1]);
-		printf("p2[0] %g; p2[1] %g\n", mlx->p2[0], mlx->p2[1]);
-		mandelbrot(mlx);
+		zoomout(mlx, x, y, mult);
 		return ;
 	}
-	cursor_x = mlx->p1[0] + pixel_x * cursor_x;
-	cursor_y = mlx->p1[1] - pixel_y * cursor_y;
-	printf("delta_x %g\ndelta_y: %g\n", cursor_x, cursor_y);
-
-	mlx->p1[0] = (3 * mlx->p1[0] + mlx->p2[0]) / mult + cursor_x;
-	mlx->p1[1] = (3 * mlx->p1[1] + mlx->p2[1]) / mult + cursor_y;
-	mlx->p2[0] = (3 * mlx->p2[0] + temp0) / mult + cursor_x;
-	mlx->p2[1] = (3 * mlx->p2[1] + temp1) / mult + cursor_y;
-
-	printf("p1[0] %g; p1[1] %g\n", mlx->p1[0], mlx->p1[1]);
-	printf("p2[0] %g; p2[1] %g\n", mlx->p2[0], mlx->p2[1]);
-	mandelbrot(mlx);
+	cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
+	cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
+	printf("delta_x %Lg\ndelta_y: %Lg\n", cursor_x, cursor_y);
+	mlx->p1[0] = cursor_x - (cursor_x - mlx->p1[0]) / mult;
+	mlx->p1[1] = cursor_y + (mlx->p1[1] - cursor_y) / mult;
+	mlx->p2[0] = cursor_x + (mlx->p2[0] - cursor_x) / mult;
+	mlx->p2[1] = cursor_y - (cursor_y - mlx->p2[1]) / mult;
+	printf("p1[0] %Lg; p1[1] %Lg\n", mlx->p1[0], mlx->p1[1]);
+	printf("p2[0] %Lg; p2[1] %Lg\n", mlx->p2[0], mlx->p2[1]);
+	printf("%g\n", (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))));
+	start(mlx);
 }
 
-int	key_hook(int keycode, t_mlx *mlx)
+int	key(int keycode, t_mlx *mlx)
 {
 	if (keycode == 65307
 			|| keycode == 53)     //MocOs
@@ -247,9 +334,9 @@ int	key_hook(int keycode, t_mlx *mlx)
 		mlx_destroy_window(mlx->mlx, mlx->win);
 		exit(0);
 	}
-	if (keycode == 69)
-		zoom(mlx, WIDTH / 2, HEIGHT / 2, 4);
-	else if (keycode == 78)
+	if (keycode == 69 || keycode == 65451)
+		zoom(mlx, WIDTH / 2, HEIGHT / 2, 2);
+	else if (keycode == 78 || keycode == 65453)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
 	printf("Hello from key_hook!\n%d\n", keycode); //4-zoom in.....5-zoom out
 	return (0);
@@ -259,7 +346,7 @@ static int	mouse(int keycode, int x, int y, t_mlx *mlx)
 {
 	printf("Mouse keycode: %d X: %d\nY: %d\n", keycode, x, y);
 	if (keycode == 4)
-		zoom(mlx, x, y, 4);
+		zoom(mlx, x, y, 2);
 	else if (keycode == 5)
 		zoom(mlx, x , y, 0.5);
 	return (1);
@@ -279,9 +366,9 @@ int	main(void)
 	mlx.p2[0] = 2;
 	mlx.p2[1] = -2;
 
-	mandelbrot(&mlx);
+	start(&mlx);
 	mlx_mouse_hook(mlx.win, mouse, &mlx);
-	mlx_key_hook(mlx.win, key_hook, &mlx);
+	mlx_key_hook(mlx.win, key, &mlx);
 	mlx_loop(mlx.mlx);
 	
 }

@@ -40,7 +40,7 @@ ${LIBFT}:
 	${MAKE} -C ${LIBFTDIR}
 
 ${NAME}:	${LIBFT} ${SOURCES} ${HEADERS}
-	$(CC) $(SOURCES) -L./libft -lft -Lmlx_linux -lmlx_linux\
+	$(CC) ${CFLAGS} $(SOURCES) -L./libft -lft -Lmlx_linux -lmlx_linux\
 		-L/usr/lib -Imlx_linux \
 		-lXext -lX11 -lm -lz -o $(NAME)
 
