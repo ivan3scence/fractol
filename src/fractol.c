@@ -44,19 +44,32 @@ static int	palette(float hue)
 	int	g[2];
 	int	b[2];
 
-	r[0] = 75;
+	//r[0] = 75;
+	//r[1] = 255;
+	//g[0] = 0;
+	//g[1] = 182;
+	//b[0] = 50;
+	//b[1] = 200;
+	r[0] = 51;
 	r[1] = 255;
 	g[0] = 0;
-	g[1] = 182;
-	b[0] = 50;
-	b[1] = 200;
+	g[1] = 153;
+	b[0] = 0;
+	b[1] = 204;
+
 	//return (iter * iter);
 	if (hue == -1)
 		return (0);
-	return (create_trgb(0,
-						r[0] + hue * (r[1] - r[0]),
-						g[0] + hue * (g[1] - g[0]),
-						b[0] + hue * (b[1] - b[0])
+	//return (create_trgb(255, //- 255 * hue,
+	//					r[0] + log(hue) * (r[1] - r[0]),
+	//					g[0] + hue * (g[1] - g[0]),
+	//					b[0] + hue * (b[1] - b[0])
+	//					));
+
+	return (create_trgb(255,
+						hue * 255,
+						0,
+						0
 						));
 	//return (create_trgb(0, get_r(iter / MAX_ITER * 255), get_g(iter / MAX_ITER * 255),
 	//			get_b(iter / MAX_ITER * 255)));
@@ -101,7 +114,7 @@ static int	get_total(int *numiters, t_mlx *mlx)
 	return (total);
 }
 
-/*static int	mndlbrt(t_mlx *mlx, long double x, long double y)
+static int	mndlbrt(t_mlx *mlx, long double x, long double y)
 {
 	int		i;
 	long double	x2=x * x;
@@ -115,8 +128,8 @@ static int	get_total(int *numiters, t_mlx *mlx)
 	x0 = x;
 	y0 = y;
 	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
-	while (x2 + y2 <= 4
-			&& ++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))))
+	while (++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+			&& x2 + y2 <= 4)
 	{
 		y = (x + x) * y + y0;
 		x = x2 - y2 + x0;
@@ -124,23 +137,24 @@ static int	get_total(int *numiters, t_mlx *mlx)
 		y2 = y * y;
 	}
 	return (i);
-}*/
+}
 
 static int	julia(t_mlx *mlx, long double x, long double y)
 {
 	int		i;
 	long double	x2=x * x;
 	long double	y2=y * y;
-	long double	x0=x;
-	long double	y0=y;
-
+	//long double	x0=-0.8;
+	//long double	y0=0.156;
+	//long double	x0=-0.4;
+	//long double	y0=0.6;
+	long double	x0=-0.7382;
+	long double	y0=0.0827;
 	i = -1;
 	x2 = x * x;
 	y2 = y * y;
-	x0 = x;
-	y0 = y;
 	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
-	while (x2 + y2 <= 16
+	while (x2 + y2 < 4
 			&& ++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))))
 	{
 		y = (x + x) * y + y0;
@@ -175,6 +189,10 @@ static int		**iter_count(t_mlx *mlx)
 		{
 			//array_iters[w][h] = mndlbrt(mlx, x, y);
 			array_iters[w][h] = julia(mlx, x, y);
+			/*if (array_iters[w][h] == MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+				my_mlx_pixel_put(mlx, w, h, 0);
+			else
+				my_mlx_pixel_put(mlx, w, h, create_trgb(0, 0, (array_iters[w][h]*6)%255, 0));*/
 			if (array_iters[w][h] == MAX_ITER + log2(4
 						/ (mlx->p2[0] - mlx->p1[0])))
 				array_iters[w][h] = -1;
@@ -183,6 +201,7 @@ static int		**iter_count(t_mlx *mlx)
 		}
 		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
 	}
+	//mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
 	return (array_iters);
 }
 

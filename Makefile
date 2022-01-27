@@ -1,4 +1,5 @@
-CFLAGS = -Wall -Wextra -Werror -fsanitize=address
+CFLAGS =
+#-Wall -Wextra -Werror -fsanitize=address
 
 HDRS = fractol.h
 

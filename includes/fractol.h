@@ -15,7 +15,7 @@
 
 # define WIDTH 1000
 # define HEIGHT 1000
-# define MAX_ITER 50
+# define MAX_ITER 2000
 typedef struct s_mlx
 {
 	void	*mlx;
