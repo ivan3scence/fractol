@@ -15,7 +15,7 @@
 
 # define WIDTH 1000
 # define HEIGHT 1000
-# define MAX_ITER 2000
+# define MAX_ITER 50
 typedef struct s_mlx
 {
 	void	*mlx;
@@ -28,5 +28,7 @@ typedef struct s_mlx
 	int		endian;
 	long double	p1[2];
 	long double	p2[2];
+	long double	x;
+	long double	y;
 }	t_mlx;
 # endif

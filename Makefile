@@ -1,5 +1,5 @@
-CFLAGS =
-#-Wall -Wextra -Werror -fsanitize=address
+CFLAGS = -fsanitize=address
+#-Wall -Wextra -Werror
 
 HDRS = fractol.h
 
@@ -19,9 +19,7 @@ BONUS = .bonus
 
 SRC = fractol.c
 
-SRC_BONUS = pipex_bonus.c validation_bonus.c parents_bonus.c \
-			error_managment_bonus.c fork_bonus.c\
-			get_next_line_bonus.c get_next_line_utils_bonus.c
+SRC_BONUS = fractol.c
 
 LIBFT_NAME = libft.a
 
@@ -41,9 +39,9 @@ ${LIBFT}:
 	${MAKE} -C ${LIBFTDIR}
 
 ${NAME}:	${LIBFT} ${SOURCES} ${HEADERS}
-	$(CC) ${CFLAGS} $(SOURCES) -L./libft -lft -Lmlx_linux -lmlx_linux\
-		-L/usr/lib -Imlx_linux \
-		-lXext -lX11 -lm -lz -o $(NAME)
+	cc ${CFLAGS} -I /usr/local/include ${SOURCES} -L /usr/local/lib -lmlx\
+		-L./libft -lft\
+		-framework OpenGL -framework AppKit -o $@
 
 bonus:	${BONUS}
 

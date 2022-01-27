@@ -60,17 +60,17 @@ static int	palette(float hue)
 	//return (iter * iter);
 	if (hue == -1)
 		return (0);
-	//return (create_trgb(255, //- 255 * hue,
-	//					r[0] + log(hue) * (r[1] - r[0]),
-	//					g[0] + hue * (g[1] - g[0]),
-	//					b[0] + hue * (b[1] - b[0])
-	//					));
-
-	return (create_trgb(255,
-						hue * 255,
-						0,
-						0
+	return (create_trgb(0,               ///with shadow
+						r[0] + hue * (r[1] - r[0]),
+						g[0] + hue * (g[1] - g[0]),
+						b[0] + hue * (b[1] - b[0])
 						));
+
+	//return (create_trgb(255 - 255 * hue,
+	//					hue * 255,
+	//					0,
+	//					0
+	//					));
 	//return (create_trgb(0, get_r(iter / MAX_ITER * 255), get_g(iter / MAX_ITER * 255),
 	//			get_b(iter / MAX_ITER * 255)));
 }
@@ -148,8 +148,8 @@ static int	julia(t_mlx *mlx, long double x, long double y)
 	//long double	y0=0.156;
 	//long double	x0=-0.4;
 	//long double	y0=0.6;
-	long double	x0=-0.7382;
-	long double	y0=0.0827;
+	//long double	x0=-0.7382;
+	//long double	y0=0.0827;
 	i = -1;
 	x2 = x * x;
 	y2 = y * y;
@@ -157,8 +157,8 @@ static int	julia(t_mlx *mlx, long double x, long double y)
 	while (x2 + y2 < 4
 			&& ++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))))
 	{
-		y = (x + x) * y + y0;
-		x = x2 - y2 + x0;
+		y = (x + x) * y + mlx->y;
+		x = x2 - y2 + mlx->x;
 		x2 = x * x;
 		y2 = y * y;
 	}
@@ -344,6 +344,37 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 	start(mlx);
 }
 
+static void	move(int keycode, t_mlx *mlx)
+{
+	long double	delta_x;
+	long double	delta_y;
+
+	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
+	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
+	if (keycode == 126)
+	{
+		mlx->p1[1] += delta_y;
+		mlx->p2[1] += delta_y;
+	}
+	else if (keycode == 125)
+	{
+		mlx->p1[1] -= delta_y;
+		mlx->p2[1] -= delta_y;
+	}
+	else if (keycode == 124)
+	{
+		mlx->p1[0] += delta_x;
+		mlx->p2[0] += delta_x;
+	}
+	else if (keycode == 123)
+	{
+		mlx->p1[0] -= delta_x;
+		mlx->p2[0] -= delta_x;
+	}
+	start(mlx);
+}
+
+
 int	key(int keycode, t_mlx *mlx)
 {
 	if (keycode == 65307
@@ -357,6 +388,8 @@ int	key(int keycode, t_mlx *mlx)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 2);
 	else if (keycode == 78 || keycode == 65453)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
+	else if (keycode < 127 && keycode > 122) //MACOS
+		move(keycode, mlx);
 	printf("Hello from key_hook!\n%d\n", keycode); //4-zoom in.....5-zoom out
 	return (0);
 }
@@ -371,6 +404,13 @@ static int	mouse(int keycode, int x, int y, t_mlx *mlx)
 	return (1);
 }
 
+static int julia_motion(int x, int y, t_mlx *mlx)
+{
+	mlx->x = 4 * ((double)x / WIDTH - 0.5);
+	mlx->y = 4 * ((double)(HEIGHT - y) / HEIGHT - 0.5);
+	start(mlx);
+	return (1);
+}
 int	main(void)
 {
 	t_mlx	mlx;
@@ -384,10 +424,13 @@ int	main(void)
 	mlx.p1[1] = 2;
 	mlx.p2[0] = 2;
 	mlx.p2[1] = -2;
+	mlx.x = -0.7382;
+	mlx.y = 0.0827;
 
 	start(&mlx);
 	mlx_mouse_hook(mlx.win, mouse, &mlx);
 	mlx_key_hook(mlx.win, key, &mlx);
+	//mlx_hook(mlx.win, 06, 1L<<6, julia_motion, &mlx);
 	mlx_loop(mlx.mlx);
 	
 }
