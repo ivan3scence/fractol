@@ -351,25 +351,15 @@ static void	move(int keycode, t_mlx *mlx)
 
 	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
 	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
-	if (keycode == 126)
+	if (keycode == 126 || keycode == 125)
 	{
-		mlx->p1[1] += delta_y;
-		mlx->p2[1] += delta_y;
+		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
+		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
 	}
-	else if (keycode == 125)
+	else if (keycode == 124 || keycode == 123)
 	{
-		mlx->p1[1] -= delta_y;
-		mlx->p2[1] -= delta_y;
-	}
-	else if (keycode == 124)
-	{
-		mlx->p1[0] += delta_x;
-		mlx->p2[0] += delta_x;
-	}
-	else if (keycode == 123)
-	{
-		mlx->p1[0] -= delta_x;
-		mlx->p2[0] -= delta_x;
+		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
+		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
 	}
 	start(mlx);
 }
@@ -390,7 +380,7 @@ int	key(int keycode, t_mlx *mlx)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
 	else if (keycode < 127 && keycode > 122) //MACOS
 		move(keycode, mlx);
-	printf("Hello from key_hook!\n%d\n", keycode); //4-zoom in.....5-zoom out
+	printf("Hello from key_hook!\n%d\n", keycode); 
 	return (0);
 }
 
