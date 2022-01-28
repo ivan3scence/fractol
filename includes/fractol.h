@@ -9,13 +9,15 @@
 # include <sys/wait.h>
 # include <fcntl.h>
 # include <errno.h>
+# include <pthread.h>
 # include "../libft/libft.h"
 //# include "../mlx_linux/mlx.h"
 # include <mlx.h>
 
-# define WIDTH 1000
-# define HEIGHT 1000
+# define WIDTH 500
+# define HEIGHT 500
 # define MAX_ITER 50
+# define THREADS 5
 typedef struct s_mlx
 {
 	void	*mlx;
@@ -30,5 +32,7 @@ typedef struct s_mlx
 	long double	p2[2];
 	long double	x;
 	long double	y;
+	int		thread;
+	int		**array_iters;
 }	t_mlx;
 # endif

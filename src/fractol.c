@@ -81,19 +81,18 @@ static int	*get_numiters(int **arr, t_mlx *mlx)
 	int	y;
 	int	*ret;
 
-	ret = (int *)malloc(sizeof(int) * (MAX_ITER + log2(4 /
+	ret = (int *)malloc(sizeof(int) * (MAX_ITER + 2 * log2(4 /
 					(mlx->p2[0] - mlx->p1[0])) + 1));
 	if (!ret)
 		exit(1);
 	x = -1;
-	while (++x <= MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+	while (++x <= MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
 		ret[x] = 0;
 	x = -1;
 	while (++x < WIDTH)
 	{
 		y = -1;
 		y++;
-		(void)arr;
 		while (++y < HEIGHT)
 		{
 			if (arr[x][y] > -1)
@@ -109,7 +108,7 @@ static int	get_total(int *numiters, t_mlx *mlx)
 	int	total;
 
 	x = -1;
-	while (++x <= MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+	while (++x <= MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
 		total += numiters[x];
 	return (total);
 }
@@ -128,7 +127,7 @@ static int	mndlbrt(t_mlx *mlx, long double x, long double y)
 	x0 = x;
 	y0 = y;
 	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
-	while (++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
+	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
 			&& x2 + y2 <= 4)
 	{
 		y = (x + x) * y + y0;
@@ -155,7 +154,7 @@ static int	julia(t_mlx *mlx, long double x, long double y)
 	y2 = y * y;
 	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
 	while (x2 + y2 < 4
-			&& ++i < (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))))
+			&& ++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0]))))
 	{
 		y = (x + x) * y + mlx->y;
 		x = x2 - y2 + mlx->x;
@@ -165,44 +164,41 @@ static int	julia(t_mlx *mlx, long double x, long double y)
 	return (i);
 }
 
-static int		**iter_count(t_mlx *mlx)
+static void	*iter_count(void *m)
 {
-	int		**array_iters;
 	int		h;
 	int		w;
 	long double		x;
 	long double		y;
+	int		area;
+	t_mlx	*mlx=m;
 
-	array_iters = (int **)malloc(sizeof(int *) * WIDTH);
-	if (!array_iters)
-		exit(1);
-	w = -1;
-	x = mlx->p1[0];
-	while (++w < WIDTH)
+	ft_putnbr_fd(mlx->thread, 1);
+	area = (mlx->p2[0] - mlx->p1[0]) / THREADS;
+	w = -1 + mlx->thread * WIDTH / THREADS;
+	x = mlx->p1[0] + area * mlx->thread;
+	while (++w < WIDTH/ THREADS * (mlx->thread + 1))
 	{
-		array_iters[w] = (int *)malloc(sizeof(int) * HEIGHT);
-		if (!array_iters)
-			exit(1);
 		h = -1;
 		y = mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			//array_iters[w][h] = mndlbrt(mlx, x, y);
-			array_iters[w][h] = julia(mlx, x, y);
+			mlx->array_iters[w][h] = mndlbrt(mlx, x, y);
+			//mlx->array_iters[w][h] = julia(mlx, x, y);
 			/*if (array_iters[w][h] == MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
 				my_mlx_pixel_put(mlx, w, h, 0);
 			else
 				my_mlx_pixel_put(mlx, w, h, create_trgb(0, 0, (array_iters[w][h]*6)%255, 0));*/
-			if (array_iters[w][h] == MAX_ITER + log2(4
+			if (mlx->array_iters[w][h] == MAX_ITER + 2 * log2(4
 						/ (mlx->p2[0] - mlx->p1[0])))
-				array_iters[w][h] = -1;
+				mlx->array_iters[w][h] = -1;
 			//printf("%d %g %g\n", array_iters[w][h],x,y);
 			y -= (mlx->p1[1] - mlx->p2[1]) / HEIGHT;
 		}
 		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
 	}
 	//mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
-	return (array_iters);
+	return (NULL);
 }
 
 static void	clean_array(double **hue, int **array_iters, int *numiters)
@@ -213,11 +209,16 @@ static void	clean_array(double **hue, int **array_iters, int *numiters)
 	while (++w < WIDTH)
 	{
 		free(hue[w]);
+		hue[w] = NULL;
 		free(array_iters[w]);
+		array_iters[w] = NULL;
 	}
 	free(hue);
+	hue = NULL;
 	free(array_iters);
+	array_iters = NULL;
 	free(numiters);
+	numiters = NULL;
 }
 
 static double	**get_hue(void)
@@ -287,38 +288,47 @@ static void	draw_pic(t_mlx *mlx, double **hue)
 
 static void start(t_mlx *mlx)
 {
-	int		**array_iters;
 	int		*numiters;
 	int		total;
 	double	**hue;
+	pthread_t	tid[THREADS];
 
-	array_iters = iter_count(mlx);
-	numiters = get_numiters(array_iters, mlx);
+	int	**array_iters;
+	array_iters = (int **)malloc(sizeof(int *) * WIDTH);
+	if (!array_iters)
+		exit(1);
+	int w=-1;
+	while (++w < WIDTH)
+	{
+		array_iters[w] = (int *)malloc(sizeof(int) * HEIGHT);
+		if (!array_iters[w])
+			exit(1);
+	}
+	mlx->array_iters = array_iters;
+	int		i;
+	i=0;
+	while (i < THREADS)
+	{
+		mlx->thread = i;
+		//ft_putnbr_fd(i, 1);
+		if (pthread_create(&tid[i++], NULL, iter_count, mlx) != 0)
+			exit(1);
+	}
+	i = -1;
+	while (++i < THREADS)
+	{
+		if (pthread_join(tid[i], NULL) != 0)
+			exit(1);
+		ft_putnbr_fd(i, 1);
+	}
+	//array_iters = iter_count(mlx);
+	numiters = get_numiters((int **)array_iters, mlx);
 	total = get_total(numiters, mlx);
 	hue = get_hue();
-	set_hue(hue, array_iters, numiters, total);
+	set_hue(hue, (int **)array_iters, numiters, total);
 	draw_pic(mlx, hue);
-	clean_array(hue, array_iters, numiters);
+	clean_array(hue, mlx->array_iters, numiters);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
-}
-
-static void	zoomout(t_mlx *mlx, int x, int y,float mult)
-{
-	long double	cursor_x;
-	long double	cursor_y;
-
-	cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
-	cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
-	printf("delta_x %Lg\ndelta_y: %Lg\n", cursor_x, cursor_y);
-	mlx->p1[0] = cursor_x - (cursor_x - mlx->p1[0]) / mult;
-	mlx->p1[1] = cursor_y + (mlx->p1[1] - cursor_y) / mult;
-	mlx->p2[0] = cursor_x + (mlx->p2[0] - cursor_x) / mult;
-	mlx->p2[1] = cursor_y - (cursor_y - mlx->p2[1]) / mult;
-	printf("p1[0] %Lg; p1[1] %Lg\n", mlx->p1[0], mlx->p1[1]);
-	printf("p2[0] %Lg; p2[1] %Lg\n", mlx->p2[0], mlx->p2[1]);
-	printf("%g\n", (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))));
-	start(mlx);
-	return ;
 }
 
 static void	zoom(t_mlx *mlx, int x, int y,float mult)
@@ -326,11 +336,11 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 	long double	cursor_x;
 	long double	cursor_y;
 
-	if (mult < 1)
-	{
-		zoomout(mlx, x, y, mult);
-		return ;
-	}
+	// if (mult < 1)
+	// {
+	// 	zoomout(mlx, x, y, mult);
+	// 	return ;
+	// }
 	cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
 	cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
 	printf("delta_x %Lg\ndelta_y: %Lg\n", cursor_x, cursor_y);
@@ -340,7 +350,7 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 	mlx->p2[1] = cursor_y - (cursor_y - mlx->p2[1]) / mult;
 	printf("p1[0] %Lg; p1[1] %Lg\n", mlx->p1[0], mlx->p1[1]);
 	printf("p2[0] %Lg; p2[1] %Lg\n", mlx->p2[0], mlx->p2[1]);
-	printf("%g\n", (MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0]))));
+	printf("%g\n", (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
 	start(mlx);
 }
 
