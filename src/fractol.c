@@ -65,6 +65,19 @@ static int	palette(float hue)
 						g[0] + hue * (g[1] - g[0]),
 						b[0] + hue * (b[1] - b[0])
 						));
+	//int cl;
+	//r[0]=g[0]=b[0]=0;
+	//if ((int)(hue * 100) % 3 == 2)
+	//	r[0] = 255;
+	//else if ((int)(hue * 100) % 3 == 1)
+	//	g[0] = 255;
+	//else
+	//	b[0] = 255;
+	//return (create_trgb(0,               ///with shadow
+	//					r[0],
+	//					g[0],
+	//					b[0]
+	//					));
 
 	//return (create_trgb(255 - 255 * hue,
 	//					hue * 255,
@@ -113,13 +126,90 @@ static int	get_total(int *numiters, t_mlx *mlx)
 	return (total);
 }
 
+static int	burnship(t_mlx *mlx, long double x, long double y)
+{
+	int		i;
+	long double	x2;
+	long double	y2;
+	long double	x0;
+	long double	y0;
+
+	i = -1;
+	y = -y;//??????????????????//
+	x2 = x * x;
+	y2 = y * y;
+	x0 = x;
+	y0 = y;
+	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+			&& x2 + y2 < 4)
+	{
+		y = fabsl((x + x) * y) + y0;
+		x = x2 - y2 + x0;
+		x2 = x * x;
+		y2 = y * y;
+	}
+	return (i);
+}
+
+static int	thorn(t_mlx *mlx, long double x, long double y)
+{
+	int		i;
+	long double	x2;
+	long double	y2;
+	long double	x0;
+	long double	y0;
+
+	i = -1;
+	//y = -y;//??????????????????//
+	x2 = x * x;
+	y2 = y * y;
+	x0 = 0.662;
+	y0 = 1.086;
+	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+			&& x2 + y2 < 4)
+	{
+		y = y / sin(y) + y0;
+		x = x / cos(x) + x0;
+		x2 = x * x;
+		y2 = y * y;
+	}
+	return (i);
+}
+
+
+static int	tricorn(t_mlx *mlx, long double x, long double y)
+{
+	int		i;
+	long double	x2;
+	long double	y2;
+	long double	x0;
+	long double	y0;
+
+	i = -1;
+	//y = -y;//??????????????????//
+	x2 = x * x;
+	y2 = y * y;
+	x0 = x;
+	y0 = y;
+	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+			&& x2 + y2 < 4)
+	{
+		y = -(x + x) * y + y0;
+		x = x2 - y2 + x0;
+		x2 = x * x;
+		y2 = y * y;
+	}
+	return (i);
+}
+
+
 static int	mndlbrt(t_mlx *mlx, long double x, long double y)
 {
 	int		i;
-	long double	x2=x * x;
-	long double	y2=y * y;
-	long double	x0=x;
-	long double	y0=y;
+	long double	x2;
+	long double	y2;
+	long double	x0;
+	long double	y0;
 
 	i = -1;
 	x2 = x * x;
@@ -184,8 +274,11 @@ static void	*iter_count(void *t)
 		y = mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			mlx->array_iters[w][h] = mndlbrt(mlx, x, y);
+			//mlx->array_iters[w][h] = mndlbrt(mlx, x, y);
 			//mlx->array_iters[w][h] = julia(mlx, x, y);
+			//mlx->array_iters[w][h] = burnship(mlx, x, y);
+			//mlx->array_iters[w][h] = tricorn(mlx, x, y);
+			mlx->array_iters[w][h] = thorn(mlx, x, y);
 			if (mlx->array_iters[w][h] == MAX_ITER + 2 * log2(4
 						/ (mlx->p2[0] - mlx->p1[0])))
 				mlx->array_iters[w][h] = -1;
@@ -342,6 +435,7 @@ static void start(t_mlx *mlx)
 	draw_pic(mlx, hue);
 	clean_array(hue, mlx->array_iters, numiters);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
+	ft_putstr_fd("zoomed\n", 1);
 }
 
 static void	zoom(t_mlx *mlx, int x, int y,float mult)
