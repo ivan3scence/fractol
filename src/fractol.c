@@ -164,20 +164,21 @@ static int	julia(t_mlx *mlx, long double x, long double y)
 	return (i);
 }
 
-static void	*iter_count(void *m)
+static void	*iter_count(void *t)
 {
-	int		h;
-	int		w;
-	long double		x;
-	long double		y;
-	int		area;
-	t_mlx	*mlx=m;
+	int			h;
+	int			w;
+	long double	x;
+	long double	y;
+	long double	area;
+	t_thread	*thr = (t_thread *)t;
+	t_mlx	*mlx=thr->mlx;
 
-	ft_putnbr_fd(mlx->thread, 1);
+	ft_putnbr_fd((thr->thread), 1);
 	area = (mlx->p2[0] - mlx->p1[0]) / THREADS;
-	w = -1 + mlx->thread * WIDTH / THREADS;
-	x = mlx->p1[0] + area * mlx->thread;
-	while (++w < WIDTH/ THREADS * (mlx->thread + 1))
+	w = -1 + thr->thread * WIDTH / THREADS;
+	x = mlx->p1[0] + area * thr->thread;
+	while (++w < WIDTH / THREADS * (thr->thread + 1))
 	{
 		h = -1;
 		y = mlx->p1[1];
@@ -185,19 +186,14 @@ static void	*iter_count(void *m)
 		{
 			mlx->array_iters[w][h] = mndlbrt(mlx, x, y);
 			//mlx->array_iters[w][h] = julia(mlx, x, y);
-			/*if (array_iters[w][h] == MAX_ITER + log2(4 / (mlx->p2[0] - mlx->p1[0])))
-				my_mlx_pixel_put(mlx, w, h, 0);
-			else
-				my_mlx_pixel_put(mlx, w, h, create_trgb(0, 0, (array_iters[w][h]*6)%255, 0));*/
 			if (mlx->array_iters[w][h] == MAX_ITER + 2 * log2(4
 						/ (mlx->p2[0] - mlx->p1[0])))
 				mlx->array_iters[w][h] = -1;
-			//printf("%d %g %g\n", array_iters[w][h],x,y);
 			y -= (mlx->p1[1] - mlx->p2[1]) / HEIGHT;
 		}
 		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
 	}
-	//mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
+	free(t);
 	return (NULL);
 }
 
@@ -306,12 +302,18 @@ static void start(t_mlx *mlx)
 	}
 	mlx->array_iters = array_iters;
 	int		i;
-	i=0;
-	while (i < THREADS)
+	t_thread	*thr;
+	int *j;
+	i=-1;
+	while (++i < THREADS)
 	{
-		mlx->thread = i;
+		thr = (t_thread *)malloc(sizeof(t_thread));
+		if (!thr)
+			exit(1);
+		thr->thread = i;
+		thr->mlx = mlx;
 		//ft_putnbr_fd(i, 1);
-		if (pthread_create(&tid[i++], NULL, iter_count, mlx) != 0)
+		if (pthread_create(&tid[i], NULL, iter_count, thr) != 0)
 			exit(1);
 	}
 	i = -1;
@@ -319,7 +321,6 @@ static void start(t_mlx *mlx)
 	{
 		if (pthread_join(tid[i], NULL) != 0)
 			exit(1);
-		ft_putnbr_fd(i, 1);
 	}
 	//array_iters = iter_count(mlx);
 	numiters = get_numiters((int **)array_iters, mlx);

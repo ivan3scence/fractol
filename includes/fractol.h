@@ -14,10 +14,11 @@
 //# include "../mlx_linux/mlx.h"
 # include <mlx.h>
 
-# define WIDTH 500
-# define HEIGHT 500
+# define WIDTH 1000
+# define HEIGHT 1000
 # define MAX_ITER 50
 # define THREADS 5
+
 typedef struct s_mlx
 {
 	void	*mlx;
@@ -35,4 +36,11 @@ typedef struct s_mlx
 	int		thread;
 	int		**array_iters;
 }	t_mlx;
-# endif
+
+typedef struct s_thread
+ {
+ 	t_mlx	*mlx;
+ 	int		thread;
+ }				t_thread;
+
+#endif
