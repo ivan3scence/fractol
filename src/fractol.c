@@ -282,29 +282,32 @@ static void	draw_pic(t_mlx *mlx, double **hue)
 	}
 }
 
-static void start(t_mlx *mlx)
+static int	**get_array_iters(void)
 {
-	int		*numiters;
-	int		total;
-	double	**hue;
-	pthread_t	tid[THREADS];
-
 	int	**array_iters;
+	int w;
+
+	w = -1;
 	array_iters = (int **)malloc(sizeof(int *) * WIDTH);
 	if (!array_iters)
 		exit(1);
-	int w=-1;
 	while (++w < WIDTH)
 	{
 		array_iters[w] = (int *)malloc(sizeof(int) * HEIGHT);
 		if (!array_iters[w])
 			exit(1);
 	}
-	mlx->array_iters = array_iters;
-	int		i;
+	return (array_iters);
+}
+
+static void	threading(t_mlx *mlx)
+{
+	int			i;
 	t_thread	*thr;
-	int *j;
-	i=-1;
+	int			*j;
+	pthread_t	tid[THREADS];
+
+	i = -1;
 	while (++i < THREADS)
 	{
 		thr = (t_thread *)malloc(sizeof(t_thread));
@@ -312,7 +315,6 @@ static void start(t_mlx *mlx)
 			exit(1);
 		thr->thread = i;
 		thr->mlx = mlx;
-		//ft_putnbr_fd(i, 1);
 		if (pthread_create(&tid[i], NULL, iter_count, thr) != 0)
 			exit(1);
 	}
@@ -322,11 +324,21 @@ static void start(t_mlx *mlx)
 		if (pthread_join(tid[i], NULL) != 0)
 			exit(1);
 	}
-	//array_iters = iter_count(mlx);
-	numiters = get_numiters((int **)array_iters, mlx);
+}
+
+
+static void start(t_mlx *mlx)
+{
+	int		*numiters;
+	int		total;
+	double	**hue;
+
+	mlx->array_iters = get_array_iters();
+	threading(mlx);
+	numiters = get_numiters(mlx->array_iters, mlx);
 	total = get_total(numiters, mlx);
 	hue = get_hue();
-	set_hue(hue, (int **)array_iters, numiters, total);
+	set_hue(hue, mlx->array_iters, numiters, total);
 	draw_pic(mlx, hue);
 	clean_array(hue, mlx->array_iters, numiters);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
@@ -337,11 +349,6 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 	long double	cursor_x;
 	long double	cursor_y;
 
-	// if (mult < 1)
-	// {
-	// 	zoomout(mlx, x, y, mult);
-	// 	return ;
-	// }
 	cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
 	cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
 	printf("delta_x %Lg\ndelta_y: %Lg\n", cursor_x, cursor_y);
@@ -433,5 +440,4 @@ int	main(void)
 	mlx_key_hook(mlx.win, key, &mlx);
 	//mlx_hook(mlx.win, 06, 1L<<6, julia_motion, &mlx);
 	mlx_loop(mlx.mlx);
-	
 }
