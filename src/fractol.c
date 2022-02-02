@@ -1,5 +1,25 @@
 #include "../includes/fractol.h"
 
+static void	print_help(void)
+{
+	ft_putstr_fd("\nfractol gets only 2 arguments\ntry one of these:\n\n\t\t\t\t$> ./fractol Mandelbrot\n\t\t\t\t$> ./fractol Julia\n\t\t\t\t$> ./fractol Buffalo\n\t\t\t\t$> ./fractol Tricorn\n\t\t\t\t$> ./fractol 'Burning Ship'\n\t\t\t\t$> ./fractol 'Perpendicular Celtic'\n\t\t\t\t$> ./fractol 'Mandelbrot Heart'\n\n", 1);
+	return ;
+}
+
+void	end(int id, t_mlx *mlx)
+{
+	printf("%d", id);
+	if (id == 1)
+		print_help();
+	if (mlx)
+	{
+		mlx_destroy_image(mlx->mlx, mlx->img);
+		mlx_clear_window(mlx->mlx, mlx->win);
+		mlx_destroy_window(mlx->mlx, mlx->win);
+	}
+	exit(1);
+}
+
 int	get_t(int trgb)
 {
 	return ((trgb >> 24) & 0xFF);
@@ -25,7 +45,7 @@ void	my_mlx_pixel_put(t_mlx *data, int x, int y, int color)
 	char	*dst;
 
 	dst = data->addr + (y * data->line_length + x * (data->bpp / 8));
-	*(unsigned int*)dst = color;
+	*(unsigned int *)dst = color;
 }
 
 int	create_trgb(int t, int r, int g, int b)
@@ -44,27 +64,26 @@ static int	palette(float hue)
 	int	g[2];
 	int	b[2];
 
-	//r[0] = 75;
-	//r[1] = 255;
-	//g[0] = 0;
-	//g[1] = 182;
-	//b[0] = 50;
-	//b[1] = 200;
+	/*r[0] = 75;
+	r[1] = 255;
+	g[0] = 0;
+	g[1] = 182;
+	b[0] = 50;
+	b[1] = 200;*/
 	r[0] = 51;
 	r[1] = 255;
 	g[0] = 0;
 	g[1] = 153;
 	b[0] = 0;
 	b[1] = 204;
-
 	//return (iter * iter);
 	if (hue == -1)
 		return (0);
-	return (create_trgb(0,               ///with shadow
-						r[0] + hue * (r[1] - r[0]),
-						g[0] + hue * (g[1] - g[0]),
-						b[0] + hue * (b[1] - b[0])
-						));
+	return (create_trgb(0, ///with shadow
+			r[0] + hue * (r[1] - r[0]),
+			g[0] + hue * (g[1] - g[0]),
+			b[0] + hue * (b[1] - b[0])
+		));
 	//int cl;
 	//r[0]=g[0]=b[0]=0;
 	//if ((int)(hue * 100) % 3 == 2)
@@ -78,13 +97,13 @@ static int	palette(float hue)
 	//					g[0],
 	//					b[0]
 	//					));
-
 	//return (create_trgb(255 - 255 * hue,
 	//					hue * 255,
 	//					0,
 	//					0
 	//					));
-	//return (create_trgb(0, get_r(iter / MAX_ITER * 255), get_g(iter / MAX_ITER * 255),
+	//return (create_trgb(0, get_r(iter / MAX_ITER * 255),
+	//get_g(iter / MAX_ITER * 255),
 	//			get_b(iter / MAX_ITER * 255)));
 }
 
@@ -94,8 +113,8 @@ static int	*get_numiters(int **arr, t_mlx *mlx)
 	int	y;
 	int	*ret;
 
-	ret = (int *)malloc(sizeof(int) * (MAX_ITER + 2 * log2(4 /
-					(mlx->p2[0] - mlx->p1[0])) + 1));
+	ret = (int *)malloc(sizeof(int) * (MAX_ITER + 2 * log2(4
+					/ (mlx->p2[0] - mlx->p1[0])) + 1));
 	if (!ret)
 		exit(1);
 	x = -1;
@@ -128,84 +147,111 @@ static int	get_total(int *numiters, t_mlx *mlx)
 
 static int	burnship(t_mlx *mlx, long double x, long double y)
 {
-	int		i;
+	int			i;
 	long double	x2;
 	long double	y2;
 	long double	x0;
 	long double	y0;
 
 	i = -1;
-	y = -y;//??????????????????//
 	x2 = x * x;
 	y2 = y * y;
 	x0 = x;
 	y0 = y;
 	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
-			&& x2 + y2 < 4)
+		&& x2 + y2 < 4)
 	{
-		y = fabsl((x + x) * y) + y0;
+		y = fabsl(x * y) * (-2) + y0;
 		x = x2 - y2 + x0;
 		x2 = x * x;
 		y2 = y * y;
 	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
 	return (i);
 }
 
-static int	thorn(t_mlx *mlx, long double x, long double y)
+static int	buffalo(t_mlx *mlx, long double xx, long double yy)
 {
-	int		i;
+	int			i;
 	long double	x2;
 	long double	y2;
-	long double	x0;
-	long double	y0;
+	long double	x;
+	long double	y;
 
 	i = -1;
-	//y = -y;//??????????????????//
+	x = 0;
+	y = 0;
 	x2 = x * x;
 	y2 = y * y;
-	x0 = 0.662;
-	y0 = 1.086;
 	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
-			&& x2 + y2 < 4)
+		&& x2 + y2 < 10000)
 	{
-		y = y / sin(y) + y0;
-		x = x / cos(x) + x0;
+		y = fabsl(y * x) * (-2) + yy;
+		x = fabsl(x2 - y2) + xx;
 		x2 = x * x;
 		y2 = y * y;
 	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
 	return (i);
 }
 
+static int	heart(t_mlx *mlx, long double xx, long double yy)
+{
+	int			i;
+	long double	x2;
+	long double	y2;
+	long double	x;
+	long double	y;
+
+	i = -1;
+	x = 0;
+	y = 0;
+	x2 = x * x;
+	y2 = y * y;
+	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		&& x2 + y2 < 10000)
+	{
+		y = fabsl(x) * y * 2 + yy;
+		x = x2 - y2 + xx;
+		x2 = x * x;
+		y2 = y * y;
+	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
+	return (i);
+}
 
 static int	tricorn(t_mlx *mlx, long double x, long double y)
 {
-	int		i;
+	int			i;
 	long double	x2;
 	long double	y2;
 	long double	x0;
 	long double	y0;
 
 	i = -1;
-	//y = -y;//??????????????????//
 	x2 = x * x;
 	y2 = y * y;
 	x0 = x;
 	y0 = y;
 	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
-			&& x2 + y2 < 4)
+		&& x2 + y2 < 4)
 	{
 		y = -(x + x) * y + y0;
 		x = x2 - y2 + x0;
 		x2 = x * x;
 		y2 = y * y;
 	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
 	return (i);
 }
 
-
 static int	mndlbrt(t_mlx *mlx, long double x, long double y)
 {
-	int		i;
+	int			i;
 	long double	x2;
 	long double	y2;
 	long double	x0;
@@ -216,41 +262,69 @@ static int	mndlbrt(t_mlx *mlx, long double x, long double y)
 	y2 = y * y;
 	x0 = x;
 	y0 = y;
-	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
 	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
-			&& x2 + y2 <= 4)
+		&& x2 + y2 <= 4)
 	{
 		y = (x + x) * y + y0;
 		x = x2 - y2 + x0;
 		x2 = x * x;
 		y2 = y * y;
 	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
 	return (i);
 }
 
 static int	julia(t_mlx *mlx, long double x, long double y)
 {
-	int		i;
-	long double	x2=x * x;
-	long double	y2=y * y;
-	//long double	x0=-0.8;
+	int			i;
+	long double	x2;
+	long double	y2;
+	/*long double	x0=-0.8;
 	//long double	y0=0.156;
 	//long double	x0=-0.4;
 	//long double	y0=0.6;
 	//long double	x0=-0.7382;
-	//long double	y0=0.0827;
+	//long double	y0=0.0827;*/
 	i = -1;
 	x2 = x * x;
 	y2 = y * y;
-	//printf("%g\n", (MAX_ITER + MAX_ITER * log2(4 / (mlx->p2[0] - mlx->p1[0]))));
 	while (x2 + y2 < 4
-			&& ++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0]))))
+		&& ++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0]))))
 	{
 		y = (x + x) * y + mlx->y;
 		x = x2 - y2 + mlx->x;
 		x2 = x * x;
 		y2 = y * y;
 	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
+	return (i);
+}
+
+static int	perp(t_mlx *mlx, long double xx, long double yy)
+{
+	int			i;
+	long double	x2;
+	long double	y2;
+	long double	x;
+	long double	y;
+
+	i = -1;
+	x = 0;
+	y = 0;
+	x2 = x * x;
+	y2 = y * y;
+	while (++i < (MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		&& x2 + y2 < 10000)
+	{
+		y = fabsl(x) * y * (-2) + yy;
+		x = fabsl(x2 - y2) + xx;
+		x2 = x * x;
+		y2 = y * y;
+	}
+	if (i == MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+		return (-1);
 	return (i);
 }
 
@@ -260,31 +334,22 @@ static void	*iter_count(void *t)
 	int			w;
 	long double	x;
 	long double	y;
-	long double	area;
-	t_thread	*thr = (t_thread *)t;
-	t_mlx	*mlx=thr->mlx;
+	t_thread	*thr;
 
-	ft_putnbr_fd((thr->thread), 1);
-	area = (mlx->p2[0] - mlx->p1[0]) / THREADS;
+	thr = (t_thread *)t;
 	w = -1 + thr->thread * WIDTH / THREADS;
-	x = mlx->p1[0] + area * thr->thread;
+	x = thr->mlx->p1[0]
+		+ (thr->mlx->p2[0] - thr->mlx->p1[0]) / THREADS * thr->thread;
 	while (++w < WIDTH / THREADS * (thr->thread + 1))
 	{
 		h = -1;
-		y = mlx->p1[1];
+		y = thr->mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			//mlx->array_iters[w][h] = mndlbrt(mlx, x, y);
-			//mlx->array_iters[w][h] = julia(mlx, x, y);
-			//mlx->array_iters[w][h] = burnship(mlx, x, y);
-			//mlx->array_iters[w][h] = tricorn(mlx, x, y);
-			mlx->array_iters[w][h] = thorn(mlx, x, y);
-			if (mlx->array_iters[w][h] == MAX_ITER + 2 * log2(4
-						/ (mlx->p2[0] - mlx->p1[0])))
-				mlx->array_iters[w][h] = -1;
-			y -= (mlx->p1[1] - mlx->p2[1]) / HEIGHT;
+			thr->mlx->array_iters[w][h] = thr->mlx->f(thr->mlx, x, y);
+			y -= (thr->mlx->p1[1] - thr->mlx->p2[1]) / HEIGHT;
 		}
-		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
+		x += (thr->mlx->p2[0] - thr->mlx->p1[0]) / WIDTH;
 	}
 	free(t);
 	return (NULL);
@@ -378,7 +443,7 @@ static void	draw_pic(t_mlx *mlx, double **hue)
 static int	**get_array_iters(void)
 {
 	int	**array_iters;
-	int w;
+	int	w;
 
 	w = -1;
 	array_iters = (int **)malloc(sizeof(int *) * WIDTH);
@@ -419,8 +484,7 @@ static void	threading(t_mlx *mlx)
 	}
 }
 
-
-static void start(t_mlx *mlx)
+static void	start(t_mlx *mlx)
 {
 	int		*numiters;
 	int		total;
@@ -438,7 +502,7 @@ static void start(t_mlx *mlx)
 	ft_putstr_fd("zoomed\n", 1);
 }
 
-static void	zoom(t_mlx *mlx, int x, int y,float mult)
+static void	zoom(t_mlx *mlx, int x, int y, float mult)
 {
 	long double	cursor_x;
 	long double	cursor_y;
@@ -456,43 +520,99 @@ static void	zoom(t_mlx *mlx, int x, int y,float mult)
 	start(mlx);
 }
 
-static void	move(int keycode, t_mlx *mlx)
+/*static void	move(int keycode, t_mlx *mlx)
+//{
+//	long double	delta_x;
+//	long double	delta_y;
+//
+//	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
+//	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
+//	if (keycode == 126 || keycode == 125)
+//	{
+//		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
+//		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
+//	}
+//	else if (keycode == 124 || keycode == 123)
+//	{
+//		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
+//		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
+//	}
+//	start(mlx);
+//}*/
+static void	move_lin2(int keycode, t_mlx *mlx, long double delta_x,
+		long double delta_y)
+{
+	if (keycode == ARR_RIGHT)
+	{
+		mlx->p1[0] += delta_x;
+		mlx->p2[0] += delta_x;
+	}
+	else if (keycode == ARR_LEFT)
+	{
+		mlx->p1[0] -= delta_x;
+		mlx->p2[0] -= delta_x;
+	}
+}
+
+static void	move_lin(int keycode, t_mlx *mlx)
 {
 	long double	delta_x;
 	long double	delta_y;
 
 	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
 	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
-	if (keycode == 126 || keycode == 125)
+	if (keycode == ARR_UP)
 	{
-		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
-		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
+		mlx->p1[1] += delta_y;
+		mlx->p2[1] += delta_y;
 	}
-	else if (keycode == 124 || keycode == 123)
+	else if (keycode == ARR_DOWN)
 	{
-		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
-		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
+		mlx->p1[1] -= delta_y;
+		mlx->p2[1] -= delta_y;
 	}
+	else
+		move_lin2(keycode, mlx, delta_x, delta_y);
 	start(mlx);
 }
 
+static int	julia_motion(int x, int y, t_mlx *mlx)
+{
+	long double	xx;
+	long double	yy;
+
+	if (mlx->flag == 0)
+		return (0);
+	xx = 4 * ((double)x / WIDTH - 0.5);
+	yy = 4 * ((double)(HEIGHT - y) / HEIGHT - 0.5);
+	if (mlx->x != xx)
+	{
+		mlx->x = xx;
+		mlx->y = yy;
+		start(mlx);
+		printf("x %d\ny %d\n", x, y);
+		sleep(1);
+	}
+	return (1);
+}
 
 int	key(int keycode, t_mlx *mlx)
 {
-	if (keycode == 65307
-			|| keycode == 53)     //MocOs
-	{
-		//mlx_destroy_image(
-		mlx_destroy_window(mlx->mlx, mlx->win);
-		exit(0);
-	}
-	if (keycode == 69 || keycode == 65451)
+	if (keycode == ESC)
+		end(ESC, mlx);
+	if (keycode == PLUS)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 2);
-	else if (keycode == 78 || keycode == 65453)
+	else if (keycode == MINUS)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
-	else if (keycode < 127 && keycode > 122) //MACOS
-		move(keycode, mlx);
-	printf("Hello from key_hook!\n%d\n", keycode); 
+	//else if (keycode < 127 && keycode > 122) //MACOS
+	//	move(keycode, mlx);`
+	else if (keycode > 65360 && keycode < 65365)
+		move_lin(keycode, mlx);
+	if (keycode == 106 && mlx->flag == 0)
+		mlx->flag = 1;
+	else if (keycode == 106 && mlx->flag == 1)
+		mlx->flag = 0;
+	printf("Hello from key_hook!\n%d\n", keycode);
 	return (0);
 }
 
@@ -502,36 +622,63 @@ static int	mouse(int keycode, int x, int y, t_mlx *mlx)
 	if (keycode == 4)
 		zoom(mlx, x, y, 2);
 	else if (keycode == 5)
-		zoom(mlx, x , y, 0.5);
+		zoom(mlx, x, y, 0.5);
 	return (1);
 }
 
-static int julia_motion(int x, int y, t_mlx *mlx)
+static void	*validation(int argc, char **argv)
 {
-	mlx->x = 4 * ((double)x / WIDTH - 0.5);
-	mlx->y = 4 * ((double)(HEIGHT - y) / HEIGHT - 0.5);
-	start(mlx);
-	return (1);
+	if (argc != 2)
+		end(INVALID_ARGS, NULL);
+	if (!ft_strncmp("Mandelbrot", argv[1], 11))
+		return ((void *)&mndlbrt);
+	else if (!ft_strncmp("Mandelbrot", argv[1], 11))
+		return ((void *)&mndlbrt);
+	else if (!ft_strncmp("Julia", argv[1], 6))
+		return ((void *)&julia);
+	else if (!ft_strncmp("Burning Ship", argv[1], 13))
+		return ((void *)&burnship);
+	else if (!ft_strncmp("Tricorn", argv[1], 8))
+		return ((void *)&tricorn);
+	else if (!ft_strncmp("Perpendicular Celtic", argv[1], 21))
+		return ((void *)&perp);
+	else if (!ft_strncmp("Buffalo", argv[1], 8))
+		return ((void *)&buffalo);
+	else if (!ft_strncmp("Mandelbrot Heart", argv[1], 17))
+		return ((void *)&heart);
+	else
+		end(INVALID_ARGS, NULL);
 }
-int	main(void)
+
+static void	init(t_mlx *mlx, char **argv)
+{
+	mlx->p1[0] = -2;
+	mlx->p1[1] = 2;
+	mlx->p2[0] = 2;
+	mlx->p2[1] = -2;
+	if (argv[1][0] == 'J')
+	{
+		mlx->x = -0.7382;
+		mlx->y = 0.0827;
+		mlx->flag = 0;
+	}
+}
+
+int	main(int argc, char **argv)
 {
 	t_mlx	mlx;
 
+	mlx.f = validation(argc, argv);
 	mlx.mlx = mlx_init();
 	mlx.win = mlx_new_window(mlx.mlx, WIDTH, HEIGHT, "fract'ol");
 	mlx.img = mlx_new_image(mlx.mlx, WIDTH, HEIGHT);
 	mlx.addr = mlx_get_data_addr(mlx.img, &mlx.bpp, &mlx.line_length,
-								&mlx.endian);
-	mlx.p1[0] = -2;
-	mlx.p1[1] = 2;
-	mlx.p2[0] = 2;
-	mlx.p2[1] = -2;
-	mlx.x = -0.7382;
-	mlx.y = 0.0827;
-
+			&mlx.endian);
+	init(&mlx, argv);
 	start(&mlx);
 	mlx_mouse_hook(mlx.win, mouse, &mlx);
 	mlx_key_hook(mlx.win, key, &mlx);
-	//mlx_hook(mlx.win, 06, 1L<<6, julia_motion, &mlx);
+	if (argv[1][0] == 'J')
+		mlx_hook(mlx.win, 6, 1L << 6, julia_motion, &mlx);
 	mlx_loop(mlx.mlx);
 }

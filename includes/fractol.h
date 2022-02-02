@@ -17,30 +17,46 @@
 # define WIDTH 1000
 # define HEIGHT 1000
 # define MAX_ITER 50
-# define THREADS 5
+# define THREADS 10
+//errors
+# define INVALID_ARGS 1
+# define MALLOC 2
+# define THREADS_ERR 3
+//keycodes
+# define MOUSE_WHEEL_UP 4
+# define MOUSE_WHEEL_DOWN 5
+# define MOUSE_CLICK 1
+# define ESC 65307
+# define PLUS 65451
+# define MINUS 65453
+# define ARR_UP 65362
+# define ARR_RIGHT 65363
+# define ARR_LEFT 65361
+# define ARR_DOWN 65364
+# define J 106
 
 typedef struct s_mlx
 {
-	void	*mlx;
-	void	*win;
-
-	void	*img;
-	char	*addr;
-	int		bpp;
-	int		line_length;
-	int		endian;
+	void		*mlx;
+	void		*win;
+	void		*img;
+	char		*addr;
+	int			bpp;
+	int			line_length;
+	int			endian;
+	int			(*f)(struct s_mlx *, long double, long double);
 	long double	p1[2];
 	long double	p2[2];
 	long double	x;
 	long double	y;
-	int		thread;
-	int		**array_iters;
+	int			flag;
+	int			**array_iters;
 }	t_mlx;
 
 typedef struct s_thread
- {
- 	t_mlx	*mlx;
- 	int		thread;
- }				t_thread;
+{
+	t_mlx	*mlx;
+	int		thread;
+}	t_thread;
 
 #endif
