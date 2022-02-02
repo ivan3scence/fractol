@@ -2,13 +2,29 @@
 
 static void	print_help(void)
 {
-	ft_putstr_fd("\nfractol gets only 2 arguments\ntry one of these:\n\n\t\t\t\t$> ./fractol Mandelbrot\n\t\t\t\t$> ./fractol Julia\n\t\t\t\t$> ./fractol Buffalo\n\t\t\t\t$> ./fractol Tricorn\n\t\t\t\t$> ./fractol 'Burning Ship'\n\t\t\t\t$> ./fractol 'Perpendicular Celtic'\n\t\t\t\t$> ./fractol 'Mandelbrot Heart'\n\n", 1);
+	ft_putstr_fd("\nfractol gets only 2 arguments\n", 1);
+	ft_putstr_fd("\ttry one of these:\n\n$> ./fractol Mandelbrot\n", 1);
+	ft_putstr_fd("$> ./fractol Julia\n$> ./fractol Buffalo\n", 1);
+	ft_putstr_fd("$> ./fractol Tricorn\n$> ./fractol 'Burning Ship'\n", 1);
+	ft_putstr_fd("$> ./fractol 'Perpendicular Celtic'\n", 1);
+	ft_putstr_fd("$> ./fractol 'Mandelbrot Heart'\n\n", 1);
+	return ;
+}
+
+static void	perry(int id)
+{
+	if (id == 2)
+		perror("Malloc rip");
+	else if (id == 3)
+		perror("Error has occured while working with threads");
 	return ;
 }
 
 void	end(int id, t_mlx *mlx)
 {
-	printf("%d", id);
+	int	w;
+
+	w = -1;
 	if (id == 1)
 		print_help();
 	if (mlx)
@@ -16,7 +32,18 @@ void	end(int id, t_mlx *mlx)
 		mlx_destroy_image(mlx->mlx, mlx->img);
 		mlx_clear_window(mlx->mlx, mlx->win);
 		mlx_destroy_window(mlx->mlx, mlx->win);
+		if (mlx->array_iters)
+		{
+			while (++w < WIDTH)
+			{
+				free(mlx->array_iters[w]);
+				mlx->array_iters[w] = NULL;
+			}
+			free(mlx->array_iters);
+			mlx->array_iters = NULL;
+		}
 	}
+	perry(id);
 	exit(1);
 }
 
@@ -116,7 +143,7 @@ static int	*get_numiters(int **arr, t_mlx *mlx)
 	ret = (int *)malloc(sizeof(int) * (MAX_ITER + 2 * log2(4
 					/ (mlx->p2[0] - mlx->p1[0])) + 1));
 	if (!ret)
-		exit(1);
+		end(MALLOC, mlx);
 	x = -1;
 	while (++x <= MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
 		ret[x] = 0;
@@ -375,7 +402,22 @@ static void	clean_array(double **hue, int **array_iters, int *numiters)
 	numiters = NULL;
 }
 
-static double	**get_hue(void)
+static void	end_hue(double **a, int index, t_mlx *mlx)
+{
+	int	i;
+
+	i = -1;
+	while (++i < index)
+	{
+		free(a[i]);
+		a[i] = NULL;
+	}
+	free(a);
+	a = NULL;
+	end(MALLOC, mlx);
+}
+
+static double	**get_hue(t_mlx *mlx)
 {
 	int		xx;
 	int		yy;
@@ -385,13 +427,13 @@ static double	**get_hue(void)
 	yy = -1;
 	hue = (double **)malloc(sizeof(double *) * WIDTH);
 	if (!hue)
-		exit(1);
+		end(MALLOC, mlx);
 	while (++xx < WIDTH)
 	{
 		yy = -1;
 		hue[xx] = (double *)malloc(sizeof(double) * HEIGHT);
 		if (!hue[xx])
-			exit(1);
+			end_hue(hue, xx, mlx);
 		while (++yy < HEIGHT)
 			hue[xx][yy] = 0;
 	}
@@ -440,7 +482,22 @@ static void	draw_pic(t_mlx *mlx, double **hue)
 	}
 }
 
-static int	**get_array_iters(void)
+static void	end_arr(int **a, int index, t_mlx *mlx)
+{
+	int	i;
+
+	i = -1;
+	while (++i < index)
+	{
+		free(a[i]);
+		a[i] = NULL;
+	}
+	free(a);
+	a = NULL;
+	end(MALLOC, mlx);
+}
+
+static int	**get_array_iters(t_mlx *mlx)
 {
 	int	**array_iters;
 	int	w;
@@ -448,12 +505,12 @@ static int	**get_array_iters(void)
 	w = -1;
 	array_iters = (int **)malloc(sizeof(int *) * WIDTH);
 	if (!array_iters)
-		exit(1);
+		end(MALLOC, mlx);
 	while (++w < WIDTH)
 	{
 		array_iters[w] = (int *)malloc(sizeof(int) * HEIGHT);
 		if (!array_iters[w])
-			exit(1);
+			end_arr(array_iters, w, mlx);
 	}
 	return (array_iters);
 }
@@ -470,17 +527,17 @@ static void	threading(t_mlx *mlx)
 	{
 		thr = (t_thread *)malloc(sizeof(t_thread));
 		if (!thr)
-			exit(1);
+			end(MALLOC, mlx);
 		thr->thread = i;
 		thr->mlx = mlx;
 		if (pthread_create(&tid[i], NULL, iter_count, thr) != 0)
-			exit(1);
+			end(THREADS_ERR, mlx);
 	}
 	i = -1;
 	while (++i < THREADS)
 	{
 		if (pthread_join(tid[i], NULL) != 0)
-			exit(1);
+			end(THREADS_ERR, mlx);
 	}
 }
 
@@ -490,11 +547,11 @@ static void	start(t_mlx *mlx)
 	int		total;
 	double	**hue;
 
-	mlx->array_iters = get_array_iters();
+	mlx->array_iters = get_array_iters(mlx);
 	threading(mlx);
 	numiters = get_numiters(mlx->array_iters, mlx);
 	total = get_total(numiters, mlx);
-	hue = get_hue();
+	hue = get_hue(mlx);
 	set_hue(hue, mlx->array_iters, numiters, total);
 	draw_pic(mlx, hue);
 	clean_array(hue, mlx->array_iters, numiters);
