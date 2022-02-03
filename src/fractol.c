@@ -17,6 +17,11 @@ static void	perry(int id)
 		perror("Malloc rip");
 	else if (id == 3)
 		perror("Error has occured while working with threads");
+	else if (id == ESC)
+	{
+		ft_putstr_fd("fract'ol has been successfully closed\n", 1);
+		exit(0);
+	}
 	return ;
 }
 
@@ -30,14 +35,16 @@ void	end(int id, t_mlx *mlx)
 	if (mlx)
 	{
 		mlx_destroy_image(mlx->mlx, mlx->img);
-		mlx_clear_window(mlx->mlx, mlx->win);
 		mlx_destroy_window(mlx->mlx, mlx->win);
 		if (mlx->array_iters)
 		{
 			while (++w < WIDTH)
 			{
-				free(mlx->array_iters[w]);
-				mlx->array_iters[w] = NULL;
+				if (mlx->array_iters[w])
+				{
+					free(mlx->array_iters[w]);
+					mlx->array_iters[w] = NULL;
+				}
 			}
 			free(mlx->array_iters);
 			mlx->array_iters = NULL;
@@ -106,7 +113,7 @@ static int	palette(float hue)
 	//return (iter * iter);
 	if (hue == -1)
 		return (0);
-	return (create_trgb(0, ///with shadow
+	return (create_trgb(255 - 255 * hue, ///with shadow
 			r[0] + hue * (r[1] - r[0]),
 			g[0] + hue * (g[1] - g[0]),
 			b[0] + hue * (b[1] - b[0])
@@ -382,24 +389,33 @@ static void	*iter_count(void *t)
 	return (NULL);
 }
 
-static void	clean_array(double **hue, int **array_iters, int *numiters)
+static void	*clean_array(double **hue, int **array_iters, int *numiters)
 {
 	int	w;
 
 	w = -1;
-	while (++w < WIDTH)
+	if (hue && array_iters)
 	{
-		free(hue[w]);
-		hue[w] = NULL;
-		free(array_iters[w]);
-		array_iters[w] = NULL;
+		while (++w < WIDTH)
+		{
+			if (hue[w])
+				free(hue[w]);
+			hue[w] = NULL;
+			if (array_iters[w])
+				free(array_iters[w]);
+			array_iters[w] = NULL;
+		}
+		free(hue);
+		hue = NULL;
+		free(array_iters);
+		array_iters = NULL;
 	}
-	free(hue);
-	hue = NULL;
-	free(array_iters);
-	array_iters = NULL;
-	free(numiters);
-	numiters = NULL;
+	if (numiters)
+	{
+		free(numiters);
+		numiters = NULL;
+	}
+	return (NULL);
 }
 
 static void	end_hue(double **a, int index, t_mlx *mlx)
@@ -554,7 +570,7 @@ static void	start(t_mlx *mlx)
 	hue = get_hue(mlx);
 	set_hue(hue, mlx->array_iters, numiters, total);
 	draw_pic(mlx, hue);
-	clean_array(hue, mlx->array_iters, numiters);
+	mlx->array_iters = clean_array(hue, mlx->array_iters, numiters);
 	mlx_put_image_to_window(mlx->mlx, mlx->win, mlx->img, 0, 0);
 	ft_putstr_fd("zoomed\n", 1);
 }
