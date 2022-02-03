@@ -26,14 +26,21 @@
 # define MOUSE_WHEEL_UP 4
 # define MOUSE_WHEEL_DOWN 5
 # define MOUSE_CLICK 1
-# define ESC 65307
-# define PLUS 65451
-# define MINUS 65453
-# define ARR_UP 65362
-# define ARR_RIGHT 65363
-# define ARR_LEFT 65361
-# define ARR_DOWN 65364
+//linux
+//# define ESC 65307
+//# define PLUS 65451
+//# define MINUS 65453
+//# define ARR_UP 65362
+//# define ARR_RIGHT 65363
+//# define ARR_LEFT 65361
+//# define ARR_DOWN 65364
+//# define J 106
+//MacOS
+# define ESC 53
+# define PLUS 69
+# define MINUS 78
 # define J 106
+
 
 typedef struct s_mlx
 {

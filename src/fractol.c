@@ -577,61 +577,61 @@ static void	zoom(t_mlx *mlx, int x, int y, float mult)
 	start(mlx);
 }
 
-/*static void	move(int keycode, t_mlx *mlx)
-//{
-//	long double	delta_x;
-//	long double	delta_y;
-//
-//	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
-//	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
-//	if (keycode == 126 || keycode == 125)
-//	{
-//		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
-//		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
-//	}
-//	else if (keycode == 124 || keycode == 123)
-//	{
-//		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
-//		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
-//	}
-//	start(mlx);
-//}*/
-static void	move_lin2(int keycode, t_mlx *mlx, long double delta_x,
-		long double delta_y)
-{
-	if (keycode == ARR_RIGHT)
-	{
-		mlx->p1[0] += delta_x;
-		mlx->p2[0] += delta_x;
-	}
-	else if (keycode == ARR_LEFT)
-	{
-		mlx->p1[0] -= delta_x;
-		mlx->p2[0] -= delta_x;
-	}
-}
-
-static void	move_lin(int keycode, t_mlx *mlx)
+static void	move(int keycode, t_mlx *mlx)
 {
 	long double	delta_x;
 	long double	delta_y;
 
 	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
 	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
-	if (keycode == ARR_UP)
+	if (keycode == 126 || keycode == 125)
 	{
-		mlx->p1[1] += delta_y;
-		mlx->p2[1] += delta_y;
+		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
+		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
 	}
-	else if (keycode == ARR_DOWN)
+	else if (keycode == 124 || keycode == 123)
 	{
-		mlx->p1[1] -= delta_y;
-		mlx->p2[1] -= delta_y;
+		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
+		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
 	}
-	else
-		move_lin2(keycode, mlx, delta_x, delta_y);
 	start(mlx);
 }
+//static void	move_lin2(int keycode, t_mlx *mlx, long double delta_x,
+//		long double delta_y)
+//{
+//	if (keycode == ARR_RIGHT)
+//	{
+//		mlx->p1[0] += delta_x;
+//		mlx->p2[0] += delta_x;
+//	}
+//	else if (keycode == ARR_LEFT)
+//	{
+//		mlx->p1[0] -= delta_x;
+//		mlx->p2[0] -= delta_x;
+//	}
+//}
+
+//static void	move_lin(int keycode, t_mlx *mlx)
+//{
+//	long double	delta_x;
+//	long double	delta_y;
+//
+//	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
+//	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
+//	if (keycode == ARR_UP)
+//	{
+//		mlx->p1[1] += delta_y;
+//		mlx->p2[1] += delta_y;
+//	}
+//	else if (keycode == ARR_DOWN)
+//	{
+//		mlx->p1[1] -= delta_y;
+//		mlx->p2[1] -= delta_y;
+//	}
+//	else
+//		move_lin2(keycode, mlx, delta_x, delta_y);
+//	start(mlx);
+//}
 
 static int	julia_motion(int x, int y, t_mlx *mlx)
 {
@@ -661,10 +661,10 @@ int	key(int keycode, t_mlx *mlx)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 2);
 	else if (keycode == MINUS)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
-	//else if (keycode < 127 && keycode > 122) //MACOS
-	//	move(keycode, mlx);`
-	else if (keycode > 65360 && keycode < 65365)
-		move_lin(keycode, mlx);
+	else if (keycode < 127 && keycode > 122) //MACOS
+		move(keycode, mlx);
+	//else if (keycode > 65360 && keycode < 65365)
+	//	move_lin(keycode, mlx);
 	if (keycode == 106 && mlx->flag == 0)
 		mlx->flag = 1;
 	else if (keycode == 106 && mlx->flag == 1)
@@ -705,6 +705,7 @@ static void	*validation(int argc, char **argv)
 		return ((void *)&heart);
 	else
 		end(INVALID_ARGS, NULL);
+	return (NULL);
 }
 
 static void	init(t_mlx *mlx, char **argv)
