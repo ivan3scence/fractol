@@ -49,7 +49,11 @@ void	end(int id, t_mlx *mlx)
 			free(mlx->array_iters);
 			mlx->array_iters = NULL;
 		}
+		//if (mlx->color)
 	}
+	free(mlx->color);
+	mlx->color = NULL;
+	
 	perry(id);
 	exit(1);
 }
@@ -92,33 +96,56 @@ int	create_trgb(int t, int r, int g, int b)
  * 00 00 fa 9a
  */
 
-static int	palette(float hue)
+static int	palette(float hue, t_mlx *mlx)
 {
-	int	r[2];
-	int	g[2];
-	int	b[2];
+	t_col	*col;
 
+	col = mlx->color;
 	/*r[0] = 75;
 	r[1] = 255;
 	g[0] = 0;
 	g[1] = 182;
 	b[0] = 50;
 	b[1] = 200;*/
-	r[0] = 51;
+	if (!col)
+	{
+		col = (t_col *)malloc(sizeof(t_col));
+		if (!col)
+			exit(1);
+		col->r[0] = 51;
+		col->r[1] = 255;
+		col->g[0] = 0;
+		col->g[1] = 153;
+		col->b[0] = 0;
+		col->b[1] = 204;
+	}
+	else
+	{
+		col->r[0] += 51 % 255;
+		col->r[1] += 255 % 255;
+		col->g[0] += 0 % 255;
+		col->g[1] += 153 % 255;
+		col->b[0] += 0 % 255;
+		col->b[1] += 204 % 255;
+	}
+
+	//b[1] = 204;
+	//return (iter * iter);
+	/*r[0] = 51;
 	r[1] = 255;
 	g[0] = 0;
 	g[1] = 153;
 	b[0] = 0;
-	b[1] = 204;
-	//return (iter * iter);
-	if (hue == -1)
+	b[1] = rand();*/
+
+
+
+    if (hue == -1)
 		return (0);
 	return (create_trgb(255 - 255 * hue, ///with shadow
-			r[0] + hue * (r[1] - r[0]),
-			g[0] + hue * (g[1] - g[0]),
-			b[0] + hue * (b[1] - b[0])
-		));
-	//int cl;
+			col->r[0] + hue * (col->r[1] - col->r[0]),
+			col->g[0] + hue * (col->g[1] - col->g[0]),
+			col->b[0] + hue * (col->b[1] - col->b[0])));	//int cl;
 	//r[0]=g[0]=b[0]=0;
 	//if ((int)(hue * 100) % 3 == 2)
 	//	r[0] = 255;
@@ -139,6 +166,11 @@ static int	palette(float hue)
 	//return (create_trgb(0, get_r(iter / MAX_ITER * 255),
 	//get_g(iter / MAX_ITER * 255),
 	//			get_b(iter / MAX_ITER * 255)));
+}
+
+static t_mlx *change_colore(t_mlx *mlx)
+{
+    return (mlx);
 }
 
 static int	*get_numiters(int **arr, t_mlx *mlx)
@@ -494,7 +526,7 @@ static void	draw_pic(t_mlx *mlx, double **hue)
 	{
 		h = -1;
 		while (++h < HEIGHT)
-			my_mlx_pixel_put(mlx, w, h, palette(hue[w][h]));
+			my_mlx_pixel_put(mlx, w, h, palette(hue[w][h], mlx));
 	}
 }
 
@@ -593,61 +625,61 @@ static void	zoom(t_mlx *mlx, int x, int y, float mult)
 	start(mlx);
 }
 
-static void	move(int keycode, t_mlx *mlx)
-{
-	long double	delta_x;
-	long double	delta_y;
-
-	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
-	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
-	if (keycode == 126 || keycode == 125)
-	{
-		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
-		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
-	}
-	else if (keycode == 124 || keycode == 123)
-	{
-		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
-		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
-	}
-	start(mlx);
-}
-//static void	move_lin2(int keycode, t_mlx *mlx, long double delta_x,
-//		long double delta_y)
-//{
-//	if (keycode == ARR_RIGHT)
-//	{
-//		mlx->p1[0] += delta_x;
-//		mlx->p2[0] += delta_x;
-//	}
-//	else if (keycode == ARR_LEFT)
-//	{
-//		mlx->p1[0] -= delta_x;
-//		mlx->p2[0] -= delta_x;
-//	}
-//}
-
-//static void	move_lin(int keycode, t_mlx *mlx)
+//static void	move(int keycode, t_mlx *mlx)
 //{
 //	long double	delta_x;
 //	long double	delta_y;
 //
 //	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
 //	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
-//	if (keycode == ARR_UP)
+//	if (keycode == 126 || keycode == 125)
 //	{
-//		mlx->p1[1] += delta_y;
-//		mlx->p2[1] += delta_y;
+//		mlx->p1[1] += delta_y + (keycode + keycode - 252) * delta_y;
+//		mlx->p2[1] += delta_y + (keycode + keycode - 252) * delta_y;
 //	}
-//	else if (keycode == ARR_DOWN)
+//	else if (keycode == 124 || keycode == 123)
 //	{
-//		mlx->p1[1] -= delta_y;
-//		mlx->p2[1] -= delta_y;
+//		mlx->p1[0] += delta_x + (keycode + keycode - 248) * delta_x;
+//		mlx->p2[0] += delta_x + (keycode + keycode - 248) * delta_x;
 //	}
-//	else
-//		move_lin2(keycode, mlx, delta_x, delta_y);
 //	start(mlx);
 //}
+static void	move_lin2(int keycode, t_mlx *mlx, long double delta_x,
+		long double delta_y)
+{
+	if (keycode == ARR_RIGHT)
+	{
+		mlx->p1[0] += delta_x;
+		mlx->p2[0] += delta_x;
+	}
+	else if (keycode == ARR_LEFT)
+	{
+		mlx->p1[0] -= delta_x;
+		mlx->p2[0] -= delta_x;
+	}
+}
+
+static void	move_lin(int keycode, t_mlx *mlx)
+{
+	long double	delta_x;
+	long double	delta_y;
+
+	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
+	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
+	if (keycode == ARR_UP)
+	{
+		mlx->p1[1] += delta_y;
+		mlx->p2[1] += delta_y;
+	}
+	else if (keycode == ARR_DOWN)
+	{
+		mlx->p1[1] -= delta_y;
+		mlx->p2[1] -= delta_y;
+	}
+	else
+		move_lin2(keycode, mlx, delta_x, delta_y);
+	start(mlx);
+}
 
 static int	julia_motion(int x, int y, t_mlx *mlx)
 {
@@ -677,15 +709,17 @@ int	key(int keycode, t_mlx *mlx)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 2);
 	else if (keycode == MINUS)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
-	else if (keycode < 127 && keycode > 122) //MACOS
-		move(keycode, mlx);
-	//else if (keycode > 65360 && keycode < 65365)
-	//	move_lin(keycode, mlx);
+	//else if (keycode < 127 && keycode > 122) //MACOS
+	//	move(keycode, mlx);
+	else if (keycode > 65360 && keycode < 65365)
+		move_lin(keycode, mlx);
 	if (keycode == 106 && mlx->flag == 0)
 		mlx->flag = 1;
 	else if (keycode == 106 && mlx->flag == 1)
 		mlx->flag = 0;
 	printf("Hello from key_hook!\n%d\n", keycode);
+    if (keycode == TAB)
+        change_colore(mlx);
 	return (0);
 }
 
@@ -736,6 +770,7 @@ static void	init(t_mlx *mlx, char **argv)
 		mlx->y = 0.0827;
 		mlx->flag = 0;
 	}
+	mlx->color = NULL;
 }
 
 int	main(int argc, char **argv)
