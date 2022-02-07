@@ -31,15 +31,28 @@
 # define MALLOC 2
 # define THREADS_ERR 3
 //keycodes
-# define MOUSE_WHEEL_UP 4
-# define MOUSE_WHEEL_DOWN 5
-# define MOUSE_CLICK 1
-# define ESC 53
-# define PLUS 69
-# define MINUS 78
-# define JAY 38
-# define TAB 48
-# define ZERO 29
+//mac
+//# define MOUSE_WHEEL_UP 4
+//# define MOUSE_WHEEL_DOWN 5
+//# define MOUSE_CLICK 1
+//# define ESC 53
+//# define PLUS 69
+//# define MINUS 78
+//# define JAY 38
+//# define TAB 48
+//# define ZERO 29
+//linux
+# include "../mlx/mlx.h"
+# define ESC 65307
+# define PLUS 65451
+# define MINUS 65453
+# define ARR_UP 65362
+# define ARR_RIGHT 65363
+# define ARR_LEFT 65361
+# define ARR_DOWN 65364
+# define JAY 106
+# define TAB 65289
+# define ZERO 48
 
 typedef struct s_col
 {
@@ -66,6 +79,7 @@ typedef struct s_mlx
 	int			**array_iters;
 	t_col		*color;
 	int			change_color;
+	int			zoom_iter;
 }	t_mlx;
 
 typedef struct s_thread

@@ -17,12 +17,21 @@ static void	zoom(t_mlx *mlx, int x, int y, float mult)
 	long double	cursor_x;
 	long double	cursor_y;
 
-	cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
-	cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
-	mlx->p1[0] = cursor_x - (cursor_x - mlx->p1[0]) / mult;
-	mlx->p1[1] = cursor_y + (mlx->p1[1] - cursor_y) / mult;
-	mlx->p2[0] = cursor_x + (mlx->p2[0] - cursor_x) / mult;
-	mlx->p2[1] = cursor_y - (cursor_y - mlx->p2[1]) / mult;
+	if ((mlx->zoom_iter > -10 && mult < 1)
+		|| (mlx->zoom_iter < 70 && mult > 1))
+	{
+		cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
+		cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
+		mlx->p1[0] = cursor_x - (cursor_x - mlx->p1[0]) / mult;
+		mlx->p1[1] = cursor_y + (mlx->p1[1] - cursor_y) / mult;
+		mlx->p2[0] = cursor_x + (mlx->p2[0] - cursor_x) / mult;
+		mlx->p2[1] = cursor_y - (cursor_y - mlx->p2[1]) / mult;
+		if (mult < 1)
+			mlx->zoom_iter -= 1;
+		else if (mult > 1)
+			mlx->zoom_iter += 1;
+	}
+	printf("raznica %d\n", mlx->zoom_iter);
 	start(mlx);
 }
 

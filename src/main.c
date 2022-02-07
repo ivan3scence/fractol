@@ -50,6 +50,7 @@ static void	init(t_mlx *mlx, char **argv)
 		mlx->flag = 0;
 	}
 	mlx->color = NULL;
+	mlx->zoom_iter = 0;
 	mlx->change_color = 0;
 }
 

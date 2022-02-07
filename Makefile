@@ -55,8 +55,10 @@ ${LIBFT}:
 ${MLX}:
 	${MAKE} -C ${MLXDIR}
 
-${NAME}:	${LIBFT} ${MLX} ${SOURCES} ${HEADERS}
-	cc ${CFLAGS} ${INCLUDES} ${SOURCES} ${LIBS} -o $@
+${NAME}:	${LIBFT} ${SOURCES} ${HEADERS}
+	$(CC) ${CFLAGS} $(SOURCES) -L./libft -lft -Lmlx -lmlx_Linux\
+		-L/usr/lib -Imlx \
+		-lXext -lX11 -lm -lz -o $(NAME)
 
 clean:
 	${MAKE} clean -C ${LIBFTDIR}

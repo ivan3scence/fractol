@@ -62,12 +62,11 @@ int	*get_numiters(int **arr, t_mlx *mlx)
 	int	y;
 	int	*ret;
 
-	ret = (int *)malloc(sizeof(int) * (MAX_ITER + 2 * log2(4
-					/ (mlx->p2[0] - mlx->p1[0])) + 1));
+	ret = (int *)malloc(sizeof(int) * (MAX_ITER + 2 * mlx->zoom_iter + 1));
 	if (!ret)
 		end(MALLOC, mlx);
 	x = -1;
-	while (++x <= MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+	while (++x <= MAX_ITER + 2 * mlx->zoom_iter)
 		ret[x] = 0;
 	x = -1;
 	while (++x < WIDTH)
@@ -90,7 +89,7 @@ int	get_total(int *numiters, t_mlx *mlx)
 
 	x = -1;
 	total = 0;
-	while (++x <= MAX_ITER + 2 * log2(4 / (mlx->p2[0] - mlx->p1[0])))
+	while (++x <= MAX_ITER + 2 * mlx->zoom_iter)
 		total += numiters[x];
 	return (total);
 }
