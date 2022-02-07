@@ -36,6 +36,7 @@
 # define ARR_DOWN 65364
 # define J 106
 # define TAB 65289
+# define ZERO 48
 //MacOS
 //# define ESC 53
 //# define PLUS 69
@@ -67,6 +68,7 @@ typedef struct s_mlx
 	int			flag;
 	int			**array_iters;
 	t_col		*color;
+	int			change_color;
 }	t_mlx;
 
 typedef struct s_thread

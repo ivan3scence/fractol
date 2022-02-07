@@ -49,11 +49,10 @@ void	end(int id, t_mlx *mlx)
 			free(mlx->array_iters);
 			mlx->array_iters = NULL;
 		}
-		//if (mlx->color)
+		if (mlx->color)
+			free(mlx->color);
+		mlx->color = NULL;
 	}
-	free(mlx->color);
-	mlx->color = NULL;
-	
 	perry(id);
 	exit(1);
 }
@@ -98,37 +97,36 @@ int	create_trgb(int t, int r, int g, int b)
 
 static int	palette(float hue, t_mlx *mlx)
 {
-	t_col	*col;
-
-	col = mlx->color;
 	/*r[0] = 75;
 	r[1] = 255;
 	g[0] = 0;
 	g[1] = 182;
 	b[0] = 50;
 	b[1] = 200;*/
-	if (!col)
+	if (mlx->color == 0 || mlx->change_color == -1)
 	{
-		col = (t_col *)malloc(sizeof(t_col));
-		if (!col)
-			exit(1);
-		col->r[0] = 51;
-		col->r[1] = 255;
-		col->g[0] = 0;
-		col->g[1] = 153;
-		col->b[0] = 0;
-		col->b[1] = 204;
+		if (!mlx->color)
+			mlx->color = (t_col *)malloc(sizeof(t_col));
+		if (!mlx->color)
+			end(MALLOC, mlx);
+		mlx->color->r[0] = 51;
+		mlx->color->r[1] = 255;
+		mlx->color->g[0] = 0;
+		mlx->color->g[1] = 153;
+		mlx->color->b[0] = 0;
+		mlx->color->b[1] = 204;
 	}
-	else
+	else if (mlx->change_color == 1)
 	{
-		col->r[0] += 51 % 255;
-		col->r[1] += 255 % 255;
-		col->g[0] += 0 % 255;
-		col->g[1] += 153 % 255;
-		col->b[0] += 0 % 255;
-		col->b[1] += 204 % 255;
+		mlx->color->r[0] = (mlx->color->r[0] + 50) % 255;
+		mlx->color->r[1] = (mlx->color->r[1] + 50) % 255;
+		mlx->color->g[0] = (mlx->color->g[0] + 50) % 255;
+		mlx->color->g[1] = (mlx->color->g[1] + 50) % 255;
+		mlx->color->b[0] = (mlx->color->b[0] + 50) % 255;
+		mlx->color->b[1] = (mlx->color->b[1] + 50) % 255;
+		mlx->change_color = 0;
 	}
-
+	//mlx->color = 0;
 	//b[1] = 204;
 	//return (iter * iter);
 	/*r[0] = 51;
@@ -137,15 +135,12 @@ static int	palette(float hue, t_mlx *mlx)
 	g[1] = 153;
 	b[0] = 0;
 	b[1] = rand();*/
-
-
-
     if (hue == -1)
 		return (0);
 	return (create_trgb(255 - 255 * hue, ///with shadow
-			col->r[0] + hue * (col->r[1] - col->r[0]),
-			col->g[0] + hue * (col->g[1] - col->g[0]),
-			col->b[0] + hue * (col->b[1] - col->b[0])));	//int cl;
+			mlx->color->r[0] + hue * (mlx->color->r[1] - mlx->color->r[0]),
+			mlx->color->g[0] + hue * (mlx->color->g[1] - mlx->color->g[0]),
+			mlx->color->b[0] + hue * (mlx->color->b[1] - mlx->color->b[0])));	//int cl;
 	//r[0]=g[0]=b[0]=0;
 	//if ((int)(hue * 100) % 3 == 2)
 	//	r[0] = 255;
@@ -719,7 +714,15 @@ int	key(int keycode, t_mlx *mlx)
 		mlx->flag = 0;
 	printf("Hello from key_hook!\n%d\n", keycode);
     if (keycode == TAB)
-        change_colore(mlx);
+	{
+        mlx->change_color = 1;
+		start(mlx);
+	}
+	else if (keycode == ZERO)
+	{
+		mlx->change_color = -1;
+		start(mlx);
+	}
 	return (0);
 }
 
@@ -771,6 +774,7 @@ static void	init(t_mlx *mlx, char **argv)
 		mlx->flag = 0;
 	}
 	mlx->color = NULL;
+	mlx->change_color = 0;
 }
 
 int	main(int argc, char **argv)
