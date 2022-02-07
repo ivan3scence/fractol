@@ -1,13 +1,26 @@
-CFLAGS = -pthread -fsanitize=address 
-#-Wall -Wextra -Werror 
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    Makefile                                           :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: sdonny <marvin@42.fr>                      +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/02/07 13:08:47 by sdonny            #+#    #+#              #
+#    Updated: 2022/02/07 13:08:49 by sdonny           ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+CFLAGS = -pthread -fsanitize=address -Wall -Wextra -Werror
+
+INCLUDES = -I${MLXDIR} -I${LIBFTDIR}
 
 HDRS = fractol.h
 
-HDRS_BONUS = pipex_bonus.h get_next_line_bonus.h
-
 HEADERS = $(addprefix includes/, ${HDRS})
 
-HEADERS_BONUS = $(addprefix includes_bonus/, ${HDRS_BONUS})
+LIBS =  -L${MLXDIR} -lmlx -lm\
+		-L${LIBFTDIR} -lft\
+		-framework OpenGL -framework AppKit
 
 CC = cc
 
@@ -15,48 +28,43 @@ RM = rm -f
 
 NAME = fractol
 
-BONUS = .bonus
-
-SRC = fractol.c
-
-SRC_BONUS = pipex_bonus.c validation_bonus.c parents_bonus.c \
-			error_managment_bonus.c fork_bonus.c\
-			get_next_line_bonus.c get_next_line_utils_bonus.c
+SRC = rgb.c error.c events.c fractls.c fractls2.c\
+		main.c start.c start2.c utils.c
 
 LIBFT_NAME = libft.a
 
 LIBFTDIR = ./libft/
 
+MLXDIR = ./mlx/
+
+MLX_NAME = libmlx.a
+
+MLX = $(addprefix ${MLXDIR}, ${MLX_NAME})
+
 LIBFT = $(addprefix ${LIBFTDIR}, ${LIBFT_NAME})
 
 SOURCES = $(addprefix src/, ${SRC})
 
-SOURCES_BONUS = $(addprefix src_bonus/, ${SRC_BONUS})
-
-.PHONY:	clean all bonus fclean re
+.PHONY:	clean all fclean re
 
 all:	${NAME}
 
 ${LIBFT}:
 	${MAKE} -C ${LIBFTDIR}
 
-${NAME}:	${LIBFT} ${SOURCES} ${HEADERS}
-	$(CC) ${CFLAGS} $(SOURCES) -L./libft -lft -Lmlx_Linux -lmlx_Linux\
-		-L/usr/lib -Imlx_Linux \
-		-lXext -lX11 -lm -lz -o $(NAME)
+${MLX}:
+	${MAKE} -C ${MLXDIR}
 
-bonus:	${BONUS}
-
-${BONUS}:	${LIBFT} ${SOURCES_BONUS} ${HEADERS_BONUS}
-	cc -Wall -Wextra -Werror -L ${LIBFTDIR} -lft ${SOURCES_BONUS} -o pipex
-	@touch $@
+${NAME}:	${LIBFT} ${MLX} ${SOURCES} ${HEADERS}
+	cc ${CFLAGS} ${INCLUDES} ${SOURCES} ${LIBS} -o $@
 
 clean:
 	${MAKE} clean -C ${LIBFTDIR}
-	@${RM} ${BONUS}
+	${MAKE} clean -C ${MLXDIR}
 
 fclean:		clean
 	${RM} ${NAME}
 	${MAKE} fclean -C ${LIBFTDIR}
+	${MAKE} clean -C ${MLXDIR}
 
 re:	fclean all

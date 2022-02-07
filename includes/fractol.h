@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   fractol.h                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: sdonny <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/02/07 13:08:32 by sdonny            #+#    #+#             */
+/*   Updated: 2022/02/07 13:08:34 by sdonny           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef FRACTOL_H
 # define FRACTOL_H
 # include <stdlib.h>
@@ -5,17 +17,13 @@
 # include <unistd.h>
 # include <stdio.h>
 # include <string.h>
-# include <sys/types.h>
-# include <sys/wait.h>
-# include <fcntl.h>
 # include <errno.h>
 # include <pthread.h>
 # include "../libft/libft.h"
-# include "../mlx_Linux/mlx.h"
 # include <mlx.h>
 
-# define WIDTH 1000
-# define HEIGHT 1000
+# define WIDTH 500
+# define HEIGHT 500
 # define MAX_ITER 50
 # define THREADS 10
 //errors
@@ -26,23 +34,12 @@
 # define MOUSE_WHEEL_UP 4
 # define MOUSE_WHEEL_DOWN 5
 # define MOUSE_CLICK 1
-//linux
-# define ESC 65307
-# define PLUS 65451
-# define MINUS 65453
-# define ARR_UP 65362
-# define ARR_RIGHT 65363
-# define ARR_LEFT 65361
-# define ARR_DOWN 65364
-# define J 106
-# define TAB 65289
-# define ZERO 48
-//MacOS
-//# define ESC 53
-//# define PLUS 69
-//# define MINUS 78
-//# define J 106
-//# define TAB 65289
+# define ESC 53
+# define PLUS 69
+# define MINUS 78
+# define JAY 38
+# define TAB 48
+# define ZERO 29
 
 typedef struct s_col
 {
@@ -76,5 +73,28 @@ typedef struct s_thread
 	t_mlx	*mlx;
 	int		thread;
 }	t_thread;
+
+int		heart(t_mlx *mlx, long double xx, long double yy);
+int		tricorn(t_mlx *mlx, long double x, long double y);
+int		mndlbrt(t_mlx *mlx, long double x, long double y);
+int		burnship(t_mlx *mlx, long double x, long double y);
+int		buffalo(t_mlx *mlx, long double xx, long double yy);
+int		julia(t_mlx *mlx, long double x, long double y);
+int		perp(t_mlx *mlx, long double xx, long double yy);
+void	start(t_mlx *mlx);
+void	*iter_count(void *t);
+void	*clean_array(double **hue, int **array_iters, int *numiters);
+void	end_hue(double **a, int index, t_mlx *mlx);
+double	**get_hue(t_mlx *mlx);
+void	set_hue(double **hue, int **array_iters, int *numiters, int total);
+void	end(int id, t_mlx *mlx);
+int		julia_motion(int x, int y, t_mlx *mlx);
+int		key(int keycode, t_mlx *mlx);
+int		mouse(int keycode, int x, int y, t_mlx *mlx);
+int		get_total(int *numiters, t_mlx *mlx);
+int		*get_numiters(int **arr, t_mlx *mlx);
+int		palette(float hue, t_mlx *mlx);
+void	my_mlx_pixel_put(t_mlx *data, int x, int y, int color);
+int		create_trgb(int t, int r, int g, int b);
 
 #endif
