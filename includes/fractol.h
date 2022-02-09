@@ -18,13 +18,12 @@
 # include <stdio.h>
 # include <string.h>
 # include <errno.h>
-# include <pthread.h>
 # include "../libft/libft.h"
 # include <mlx.h>
 
-# define WIDTH 500
-# define HEIGHT 500
-# define MAX_ITER 50
+# define WIDTH 800
+# define HEIGHT 800
+# define MAX_ITER 40
 # define THREADS 10
 //errors
 # define INVALID_ARGS 1
@@ -82,12 +81,6 @@ typedef struct s_mlx
 	int			zoom_iter;
 }	t_mlx;
 
-typedef struct s_thread
-{
-	t_mlx	*mlx;
-	int		thread;
-}	t_thread;
-
 int		heart(t_mlx *mlx, long double xx, long double yy);
 int		tricorn(t_mlx *mlx, long double x, long double y);
 int		mndlbrt(t_mlx *mlx, long double x, long double y);
@@ -96,7 +89,7 @@ int		buffalo(t_mlx *mlx, long double xx, long double yy);
 int		julia(t_mlx *mlx, long double x, long double y);
 int		perp(t_mlx *mlx, long double xx, long double yy);
 void	start(t_mlx *mlx);
-void	*iter_count(void *t);
+void	iter_count(t_mlx *mlx);
 void	*clean_array(double **hue, int **array_iters, int *numiters);
 void	end_hue(double **a, int index, t_mlx *mlx);
 double	**get_hue(t_mlx *mlx);

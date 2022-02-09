@@ -18,7 +18,7 @@ static void	zoom(t_mlx *mlx, int x, int y, float mult)
 	long double	cursor_y;
 
 	if ((mlx->zoom_iter > -10 && mult < 1)
-		|| (mlx->zoom_iter < 70 && mult > 1))
+		|| (mlx->zoom_iter < 120 && mult > 1))
 	{
 		cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
 		cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
@@ -30,9 +30,9 @@ static void	zoom(t_mlx *mlx, int x, int y, float mult)
 			mlx->zoom_iter -= 1;
 		else if (mult > 1)
 			mlx->zoom_iter += 1;
+		start(mlx);
 	}
 	printf("raznica %d\n", mlx->zoom_iter);
-	start(mlx);
 }
 
 static void	move(int keycode, t_mlx *mlx)
@@ -106,8 +106,8 @@ int	key(int keycode, t_mlx *mlx)
 int	mouse(int keycode, int x, int y, t_mlx *mlx)
 {
 	if (keycode == 4)
-		zoom(mlx, x, y, 2);
+		zoom(mlx, x, y, 1.2);
 	else if (keycode == 5)
-		zoom(mlx, x, y, 0.5);
+		zoom(mlx, x, y, 0.8);
 	return (1);
 }

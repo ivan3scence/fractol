@@ -12,31 +12,26 @@
 
 #include "../includes/fractol.h"
 
-void	*iter_count(void *t)
+void	iter_count(t_mlx *mlx)
 {
 	int			h;
 	int			w;
 	long double	x;
 	long double	y;
-	t_thread	*thr;
 
-	thr = (t_thread *)t;
-	w = -1 + thr->thread * WIDTH / THREADS;
-	x = thr->mlx->p1[0]
-		+ (thr->mlx->p2[0] - thr->mlx->p1[0]) / THREADS * thr->thread;
-	while (++w < WIDTH / THREADS * (thr->thread + 1))
+	w = -1;
+	x = mlx->p1[0];
+	while (++w < WIDTH)
 	{
 		h = -1;
-		y = thr->mlx->p1[1];
+		y = mlx->p1[1];
 		while (++h < HEIGHT)
 		{
-			thr->mlx->array_iters[w][h] = thr->mlx->f(thr->mlx, x, y);
-			y -= (thr->mlx->p1[1] - thr->mlx->p2[1]) / HEIGHT;
+			mlx->array_iters[w][h] = mlx->f(mlx, x, y);
+			y -= (mlx->p1[1] - mlx->p2[1]) / HEIGHT;
 		}
-		x += (thr->mlx->p2[0] - thr->mlx->p1[0]) / WIDTH;
+		x += (mlx->p2[0] - mlx->p1[0]) / WIDTH;
 	}
-	free(t);
-	return (NULL);
 }
 
 void	*clean_array(double **hue, int **array_iters, int *numiters)

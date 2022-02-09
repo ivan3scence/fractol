@@ -77,7 +77,7 @@ int	mndlbrt(t_mlx *mlx, long double x, long double y)
 	y2 = y * y;
 	x0 = x;
 	y0 = y;
-	while (++i < (MAX_ITER + 2 * mlx->zoom_iter)
+	while (++i < (MAX_ITER + mlx->zoom_iter)
 		&& x2 + y2 <= 4)
 	{
 		y = (x + x) * y + y0;
@@ -85,7 +85,7 @@ int	mndlbrt(t_mlx *mlx, long double x, long double y)
 		x2 = x * x;
 		y2 = y * y;
 	}
-	if (i == MAX_ITER + 2 * mlx->zoom_iter)
+	if (i == MAX_ITER + mlx->zoom_iter)
 		return (-1);
 	return (i);
 }
@@ -100,14 +100,14 @@ int	julia(t_mlx *mlx, long double x, long double y)
 	x2 = x * x;
 	y2 = y * y;
 	while (x2 + y2 < 4
-		&& ++i < (MAX_ITER + 2 * mlx->zoom_iter))
+		&& ++i < (MAX_ITER + mlx->zoom_iter))
 	{
 		y = (x + x) * y + mlx->y;
 		x = x2 - y2 + mlx->x;
 		x2 = x * x;
 		y2 = y * y;
 	}
-	if (i == MAX_ITER + 2 * mlx->zoom_iter)
+	if (i == MAX_ITER + mlx->zoom_iter)
 		return (-1);
 	return (i);
 }
@@ -125,7 +125,7 @@ int	perp(t_mlx *mlx, long double xx, long double yy)
 	y = 0;
 	x2 = x * x;
 	y2 = y * y;
-	while (++i < (MAX_ITER + 2 * mlx->zoom_iter)
+	while (++i < (MAX_ITER + mlx->zoom_iter)
 		&& x2 + y2 < 10000)
 	{
 		y = fabsl(x) * y * (-2) + yy;
@@ -133,7 +133,7 @@ int	perp(t_mlx *mlx, long double xx, long double yy)
 		x2 = x * x;
 		y2 = y * y;
 	}
-	if (i == MAX_ITER + 2 * mlx->zoom_iter)
+	if (i == MAX_ITER + mlx->zoom_iter)
 		return (-1);
 	return (i);
 }

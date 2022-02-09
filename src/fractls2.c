@@ -25,7 +25,7 @@ int	burnship(t_mlx *mlx, long double x, long double y)
 	y2 = y * y;
 	x0 = x;
 	y0 = y;
-	while (++i < (MAX_ITER + 2 * mlx->zoom_iter)
+	while (++i < (MAX_ITER + mlx->zoom_iter)
 		&& x2 + y2 < 4)
 	{
 		y = fabsl(x * y) * (-2) + y0;
@@ -33,7 +33,7 @@ int	burnship(t_mlx *mlx, long double x, long double y)
 		x2 = x * x;
 		y2 = y * y;
 	}
-	if (i == MAX_ITER + 2 * mlx->zoom_iter)
+	if (i == MAX_ITER + mlx->zoom_iter)
 		return (-1);
 	return (i);
 }
@@ -51,7 +51,7 @@ int	buffalo(t_mlx *mlx, long double xx, long double yy)
 	y = 0;
 	x2 = x * x;
 	y2 = y * y;
-	while (++i < (MAX_ITER + 2 * mlx->zoom_iter)
+	while (++i < (MAX_ITER + mlx->zoom_iter)
 		&& x2 + y2 < 10000)
 	{
 		y = fabsl(y * x) * (-2) + yy;
@@ -59,7 +59,7 @@ int	buffalo(t_mlx *mlx, long double xx, long double yy)
 		x2 = x * x;
 		y2 = y * y;
 	}
-	if (i == MAX_ITER + 2 * mlx->zoom_iter)
+	if (i == MAX_ITER + mlx->zoom_iter)
 		return (-1);
 	return (i);
 }
