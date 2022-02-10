@@ -21,8 +21,8 @@
 # include "../libft/libft.h"
 # include <mlx.h>
 
-# define WIDTH 800
-# define HEIGHT 800
+# define WIDTH 500
+# define HEIGHT 500
 # define MAX_ITER 40
 # define THREADS 10
 //errors

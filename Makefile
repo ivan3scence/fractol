@@ -10,7 +10,8 @@
 #                                                                              #
 # **************************************************************************** #
 
-CFLAGS = -pthread -fsanitize=address -Wall -Wextra -Werror
+CFLAGS =  -fsanitize=address 
+#-Wall -Wextra -Werror
 
 INCLUDES = -I${MLXDIR} -I${LIBFTDIR}
 
@@ -56,7 +57,7 @@ ${MLX}:
 	${MAKE} -C ${MLXDIR}
 
 ${NAME}:	${LIBFT} ${SOURCES} ${HEADERS}
-	$(CC) ${CFLAGS} $(SOURCES) -L./libft -lft -Lmlx -lmlx_Linux\
+	$(CC) ${CFLAGS} fractol_copy_lin.c $(SOURCES) -L./libft -lft -Lmlx -lmlx_Linux\
 		-L/usr/lib -Imlx \
 		-lXext -lX11 -lm -lz -o $(NAME)
 

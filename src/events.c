@@ -11,14 +11,49 @@
 /* ************************************************************************** */
 
 #include "../includes/fractol.h"
+static void	move_lin2(int keycode, t_mlx *mlx, long double delta_x,
+		long double delta_y)
+{
+	if (keycode == ARR_RIGHT)
+	{
+		mlx->p1[0] += delta_x;
+		mlx->p2[0] += delta_x;
+	}
+	else if (keycode == ARR_LEFT)
+	{
+		mlx->p1[0] -= delta_x;
+		mlx->p2[0] -= delta_x;
+	}
+}
 
+static void	move_lin(int keycode, t_mlx *mlx)
+{
+	long double	delta_x;
+	long double	delta_y;
+
+	delta_x = (mlx->p2[0] - mlx->p1[0]) / 5;
+	delta_y = (mlx->p1[1] - mlx->p2[1]) / 5;
+	if (keycode == ARR_UP)
+	{
+		mlx->p1[1] += delta_y;
+		mlx->p2[1] += delta_y;
+	}
+	else if (keycode == ARR_DOWN)
+	{
+		mlx->p1[1] -= delta_y;
+		mlx->p2[1] -= delta_y;
+	}
+	else
+		move_lin2(keycode, mlx, delta_x, delta_y);
+	start(mlx);
+}
 static void	zoom(t_mlx *mlx, int x, int y, float mult)
 {
 	long double	cursor_x;
 	long double	cursor_y;
 
 	if ((mlx->zoom_iter > -10 && mult < 1)
-		|| (mlx->zoom_iter < 120 && mult > 1))
+		|| (mlx->zoom_iter < 60 && mult > 1))
 	{
 		cursor_x = mlx->p1[0] + (mlx->p2[0] - mlx->p1[0]) / WIDTH * x;
 		cursor_y = mlx->p1[1] - (mlx->p1[1] - mlx->p2[1]) / HEIGHT * y;
@@ -82,8 +117,10 @@ int	key(int keycode, t_mlx *mlx)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 2);
 	else if (keycode == MINUS)
 		zoom(mlx, WIDTH / 2, HEIGHT / 2, 0.5);
-	else if (keycode < 127 && keycode > 122)
-		move(keycode, mlx);
+	//else if (keycode < 127 && keycode > 122)
+//		move(keycode, mlx);
+	else if (keycode < 65365 && keycode > 65360)
+		move_lin(keycode, mlx);
 	if (keycode == 106 && mlx->flag == 0)
 		mlx->flag = 1;
 	else if (keycode == 106 && mlx->flag == 1)
