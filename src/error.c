@@ -30,8 +30,6 @@ static void	perry(int id)
 {
 	if (id == 2)
 		perror("Malloc rip");
-	else if (id == 3)
-		perror("Error has occured while working with threads");
 	else if (id == ESC)
 	{
 		ft_putstr_fd("fract'ol has been successfully closed\n", 1);

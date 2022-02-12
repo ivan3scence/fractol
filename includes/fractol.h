@@ -21,14 +21,12 @@
 # include "../libft/libft.h"
 # include <mlx.h>
 
-# define WIDTH 500
-# define HEIGHT 500
+# define WIDTH 600
+# define HEIGHT 600
 # define MAX_ITER 40
-# define THREADS 10
 //errors
 # define INVALID_ARGS 1
 # define MALLOC 2
-# define THREADS_ERR 3
 //keycodes
 //mac
 //# define MOUSE_WHEEL_UP 4

@@ -59,31 +59,6 @@ static int	**get_array_iters(t_mlx *mlx)
 	return (array_iters);
 }
 
-// static void	threading(t_mlx *mlx)
-// {
-// 	int			i;
-// 	t_thread	*thr;
-// 	pthread_t	tid[THREADS];
-
-// 	i = -1;
-// 	while (++i < THREADS)
-// 	{
-// 		thr = (t_thread *)malloc(sizeof(t_thread));
-// 		if (!thr)
-// 			end(MALLOC, mlx);
-// 		thr->thread = i;
-// 		thr->mlx = mlx;
-// 		if (pthread_create(&tid[i], NULL, iter_count, thr) != 0)
-// 			end(THREADS_ERR, mlx);
-// 	}
-// 	i = -1;
-// 	while (++i < THREADS)
-// 	{
-// 		if (pthread_join(tid[i], NULL) != 0)
-// 			end(THREADS_ERR, mlx);
-// 	}
-// }
-
 void	start(t_mlx *mlx)
 {
 	int		*numiters;
